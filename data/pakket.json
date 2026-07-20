@@ -1,0 +1,217 @@
+{
+  "profiel": {
+    "naam": "Carlijn Corporaal",
+    "titel": "Marketing & Communication Specialist · MSc Business Administration",
+    "email": "carlijnfcorporaal@gmail.com",
+    "telefoon": "06 - 15395319",
+    "locatie": "Amsterdam",
+    "linkedin": "https://www.linkedin.com/in/carlijn-corporaal-a7ab43121/",
+    "website": "",
+    "pitch": "Ambitious and results-driven MSc Entrepreneurship & Management in the Creative Industries student at the University of Amsterdam, with hands-on experience in marketing and brand campaigns at RE/MAX, Hulaaloop and Reliving. I combine creative and strategic thinking with a hands-on approach, and I am available from September 2026 for a full-time position."
+  },
+
+  "galerij": [
+    { "titel": "Reliving — e-commerce & social", "afbeeldingen": [
+      "assets/gallery/reliving-home.jpg", "assets/gallery/reliving-shop.jpg", "assets/gallery/reliving-post.jpg",
+      "assets/gallery/reliving-grid.jpg", "assets/gallery/reliving-holiday.jpg", "assets/gallery/reliving-stories.jpg" ] },
+    { "titel": "RE/MAX Curaçao — website & video", "afbeeldingen": [
+      "assets/gallery/remax-website.jpg", "assets/gallery/remax-listings.jpg", "assets/gallery/remax-tiktok.jpg" ] },
+    { "titel": "Hulaaloop — brand & social", "afbeeldingen": [
+      "assets/gallery/hulaaloop-site.jpg", "assets/gallery/hulaaloop-feed.jpg", "assets/gallery/hulaaloop-post.jpg" ] },
+    { "titel": "Personal brand identity", "afbeeldingen": [
+      "assets/gallery/personal-brand.jpg" ] }
+  ],
+
+  "werkervaring": [
+    {
+      "id": "we-hulaaloop",
+      "impressie": "At this circular kids-fashion start-up I drive the brand evolution and sharpen the marketing and social media strategy — from positioning all the way down to the day-to-day execution.",
+      "afbeeldingen": ["assets/gallery/hulaaloop-site.jpg", "assets/gallery/hulaaloop-feed.jpg", "assets/gallery/hulaaloop-post.jpg"],
+      "functie": "Parttime Marketing & Communication Specialist",
+      "bedrijf": "Hulaaloop",
+      "branche": "Marketing / Startup",
+      "periode": "Feb 2024 – Sep 2024",
+      "verantwoordelijkheden": [
+        "Driving brand evolution and refining marketing and social media strategies, from strategy to tactics."
+      ],
+      "resultaat": "",
+      "tags": ["marketing", "communicatie", "communication", "social media", "marketingstrategie", "marketing strategy", "brand", "merk", "content", "campagne", "campaign", "strategie", "tactiek"]
+    },
+    {
+      "id": "we-reliving",
+      "impressie": "My first full-time marketing role: I ran Reliving's website and social channels (Instagram 45k+), managed Google Analytics and e-mail campaigns, and coordinated influencer marketing, events and the collaboration with partner Fonq.",
+      "afbeeldingen": ["assets/gallery/reliving-home.jpg", "assets/gallery/reliving-grid.jpg", "assets/gallery/reliving-shop.jpg"],
+      "functie": "Fulltime Online Marketing Internship",
+      "bedrijf": "Reliving",
+      "branche": "E-commerce / Interior",
+      "periode": "Sep 2023 – Jan 2024",
+      "verantwoordelijkheden": [
+        "Maintaining the Reliving website and overseeing social media across platforms, including an Instagram of 45k+ followers.",
+        "Managing Google Analytics and orchestrating e-mail marketing campaigns.",
+        "Coordinating influencer marketing initiatives and events, and maintaining the collaboration with partner Fonq."
+      ],
+      "resultaat": "Managed a social media presence with an Instagram audience of over 45,000 followers.",
+      "tags": ["online marketing", "social media", "instagram", "google analytics", "ga4", "e-mailmarketing", "email marketing", "influencer marketing", "content", "events", "website", "e-commerce", "webshop", "analytics", "nieuwsbrief"]
+    },
+    {
+      "id": "we-remax",
+      "impressie": "Six intensive months of hands-on marketing for RE/MAX and PMI Curaçao in an intercultural market. I initiated their short-form video approach, created campaigns across TikTok, Instagram and Facebook, handled B2B and B2C contacts and e-mail marketing, and ran an independent project coaching individual realtors on their personal branding.",
+      "afbeeldingen": ["assets/gallery/remax-website.jpg", "assets/gallery/remax-listings.jpg"],
+      "functie": "Fulltime Double Marketing & Communication Internship",
+      "bedrijf": "RE/MAX Bonbini Curaçao & PMI Curaçao",
+      "branche": "Real estate",
+      "periode": "Aug 2022 & Jan 2023",
+      "verantwoordelijkheden": [
+        "Managing online and offline marketing for RE/MAX and PMI Curaçao in an intercultural environment.",
+        "Creating social media video campaigns for Facebook, Instagram and TikTok.",
+        "Maintaining B2B and B2C contacts, accompanying viewings, updating the website, hosting social events and managing e-mail marketing."
+      ],
+      "resultaat": "",
+      "tags": ["marketing", "communicatie", "communication", "social media", "video", "videocampagne", "facebook", "instagram", "tiktok", "b2b", "b2c", "e-mailmarketing", "email marketing", "website", "events", "vastgoed", "real estate", "intercultureel", "content"]
+    },
+    {
+      "id": "we-customerservice",
+      "impressie": "Alongside my studies I worked in customer service for Schiphol, TTC (GGD GHOR) and Brenger — analysing client needs and delivering tailored solutions, which sharpened my communication and problem-solving under pressure.",
+      "functie": "Parttime Customer Service Specialist",
+      "bedrijf": "Schiphol · TTC (GGD GHOR) · Brenger",
+      "branche": "Customer service",
+      "periode": "Jan 2022 – Aug 2022 & Jan 2023 – Sep 2025",
+      "verantwoordelijkheden": [
+        "Analyzing client needs and delivering tailored solutions.",
+        "Ensuring a seamless, efficient and satisfying customer experience."
+      ],
+      "resultaat": "",
+      "tags": ["customer service", "klantenservice", "klantcontact", "customer experience", "communicatie", "communication", "problem solving", "klanttevredenheid", "service"]
+    }
+  ],
+
+  "projecten": [
+    {
+      "id": "pr-broadcast",
+      "detailpagina": "#/project/pr-broadcast",
+      "afbeeldingen": ["assets/broadcast/broadcast-01.jpg", "assets/broadcast/broadcast-08.jpg", "assets/broadcast/broadcast-04.jpg"],
+      "titel": "Broadcast Magazine — Strategic Rebranding",
+      "impressie": "A consulting project in which I lead the rebranding of BM Magazine — its app, website and communication tools — translating brand strategy into concrete B2B and B2C touchpoints.",
+      "periode": "Sep 2025 – Present",
+      "resultaat": "",
+      "vaardigheden": ["rebranding", "branding", "brand strategy", "consulting", "content"],
+      "tags": ["rebranding", "branding", "merk", "brand strategy", "merkstrategie", "communicatie", "communication", "b2b", "b2c", "app", "website", "consulting", "marketingstrategie", "media", "content"],
+      "detail": {
+        "kicker": "Consulting project",
+        "titelHtml": "Broadcast Magazine<br>Strategic Rebranding",
+        "galerijMap": "assets/broadcast/broadcast-",
+        "blokken": [
+          { "h": "The brief", "p": "Broadcast Magazine (BM) needed a refreshed identity that carries across every touchpoint — from the printed magazine to its app and website. The goal: a clearer, more contemporary brand that speaks to both B2B partners and B2C readers." },
+          { "h": "My role", "p": "As the consultant leading the rebranding, I set the direction and translated brand strategy into concrete, usable tools — bridging strategy and hands-on execution across the magazine, the app and the website." },
+          { "h": "Approach", "p": "Starting from BM's audience and positioning, I aligned tone of voice, visual language and layout, then applied the new identity consistently across print and digital. Every deliverable was designed to work for the two very different audiences the brand serves." },
+          { "h": "Deliverables", "list": ["Rebranding direction for BM Magazine (print)", "App & website identity and layout", "Communication tools for B2B and B2C engagement"] }
+        ]
+      }
+    },
+    {
+      "id": "pr-trappelen",
+      "detailpagina": "#/project/pr-trappelen",
+      "impressie": "As co-writer and producer I helped bring an original musical to the stage of the 1,580-seat MartiniPlaza Theater — from scripting the story to producing the run. It sold out in both September 2021 and March 2022, and taught me how storytelling, planning and teamwork come together in a live production.",
+      "titel": "Musical \"Trappelen\" — co-writer & producer",
+      "periode": "2021 – 2022",
+      "beschrijving": "Co-writer and producer of the musical Trappelen, performed at the MartiniPlaza Theater.",
+      "resultaat": "Over 1,580 seats sold in both September 2021 and March 2022.",
+      "vaardigheden": ["production", "storytelling", "creative writing", "project management", "events"],
+      "tags": ["musical", "productie", "production", "creatief", "creative", "storytelling", "schrijven", "writing", "theater", "events", "projectmanagement", "project management", "cultuur", "podium"],
+      "detail": {
+        "kicker": "Creative production · Theatre",
+        "blokken": [
+          { "h": "The production", "p": "Trappelen is an original musical I co-wrote and produced for the 1,580-seat MartiniPlaza Theater in Groningen. From the first draft of the story to the final performance, I helped shape a full-scale live production from the ground up." },
+          { "h": "My role", "p": "As co-writer and producer I worked across the whole pipeline: scripting the story, planning the production and coordinating the team that brought it to the stage." },
+          { "h": "What it taught me", "p": "Producing a live show is storytelling under real constraints — budget, planning, a large cast and a hard opening night. It sharpened how I combine creative vision with structured project management, a mix I bring to every marketing campaign." }
+        ]
+      }
+    },
+    {
+      "id": "pr-remax-video",
+      "detailpagina": "#/project/pr-remax-video",
+      "impressie": "I introduced short-form video to RE/MAX Curaçao, turning listings and island lifestyle into scroll-stopping content for TikTok, Instagram and Facebook. Working in an intercultural market, I concepted and produced the videos myself and helped make them a real part of the office's omnichannel strategy.",
+      "afbeeldingen": ["assets/gallery/remax-tiktok.jpg", "assets/gallery/remax-website.jpg"],
+      "titel": "Social media video campaigns — RE/MAX Curaçao",
+      "periode": "2022 – 2023",
+      "beschrijving": "Concepting and creating social media video campaigns for Facebook, Instagram and TikTok in an intercultural real-estate context.",
+      "resultaat": "Drove online brand visibility for RE/MAX and PMI Curaçao across multiple channels.",
+      "vaardigheden": ["social media", "video", "content creation", "campaign management"],
+      "tags": ["social media", "video", "videocampagne", "content", "content creatie", "content creation", "facebook", "instagram", "tiktok", "campagne", "campaign", "vastgoed", "real estate", "branding", "intercultureel"],
+      "detail": {
+        "kicker": "Social media · Video",
+        "blokken": [
+          { "h": "The challenge", "p": "RE/MAX Curaçao had strong listings and island lifestyle to show, but no short-form video presence. In an intercultural market, the brand needed content that could stop the scroll on TikTok, Instagram and Facebook." },
+          { "h": "My role", "p": "I introduced short-form video to the office end-to-end: I concepted, filmed and edited the videos myself, turning listings and the island lifestyle into scroll-stopping content." },
+          { "h": "Approach", "p": "I built a repeatable content approach across TikTok, Instagram and Facebook and made video a real part of the office's omnichannel strategy, helping realtors show properties in a fresh, personal way." },
+          { "h": "Impact", "p": "Short-form video became a lasting part of how RE/MAX and PMI Curaçao show up online, driving brand visibility across multiple channels." }
+        ]
+      }
+    },
+    {
+      "id": "pr-reliving-growth",
+      "detailpagina": "#/project/pr-reliving-growth",
+      "impressie": "I grew and managed Reliving's Instagram community of 45k+ followers with data-driven content, seasonal campaigns and influencer collaborations. I co-organised an influencer event and supported the Utrecht pop-up store, from first concept to hands-on execution.",
+      "afbeeldingen": ["assets/gallery/reliving-post.jpg", "assets/gallery/reliving-stories.jpg", "assets/gallery/reliving-grid.jpg", "assets/gallery/reliving-holiday.jpg"],
+      "titel": "Instagram growth & influencer marketing — Reliving",
+      "periode": "Sep 2023 – Jan 2024",
+      "beschrijving": "Building and managing Reliving's social channels (Instagram 45k+ followers), influencer collaborations, e-mail campaigns and events, alongside the partnership with Fonq.",
+      "resultaat": "Maintained and grew a community of 45,000+ Instagram followers with data-driven content and campaigns.",
+      "vaardigheden": ["social media", "influencer marketing", "e-mail marketing", "google analytics", "content"],
+      "tags": ["social media", "instagram", "influencer marketing", "e-mailmarketing", "email marketing", "google analytics", "ga4", "content", "events", "e-commerce", "community", "analytics"],
+      "detail": {
+        "kicker": "Social & influencer marketing",
+        "blokken": [
+          { "h": "The goal", "p": "Reliving's Instagram community of 45,000+ followers needed consistent, data-driven content and campaigns that turned attention into engagement and sales for the interior e-commerce brand." },
+          { "h": "My role", "p": "I grew and managed the social channels day to day — planning content, running seasonal campaigns, coordinating influencer collaborations and supporting e-mail marketing alongside the partnership with Fonq." },
+          { "h": "Approach", "p": "I combined insights from Google Analytics with a clear content calendar and influencer collaborations, co-organised an influencer event and supported the Utrecht pop-up store from first concept to hands-on execution." }
+        ]
+      }
+    }
+  ],
+
+  "vaardigheden": [
+    { "id": "sk-analytics", "naam": "Google Analytics (GA4) & Search Console", "niveau": "Tool", "tags": ["google analytics", "ga4", "google search console", "data-analyse", "analytics", "seo", "rapportage"] },
+    { "id": "sk-ads", "naam": "Google Ads & Meta Ads Manager", "niveau": "Tool", "tags": ["google ads", "sea", "meta ads", "advertising", "facebook", "instagram", "paid social", "adverteren"] },
+    { "id": "sk-social", "naam": "Social media marketing", "niveau": "Expert", "tags": ["social media", "instagram", "tiktok", "facebook", "content", "meta business suite", "later", "influencer marketing"] },
+    { "id": "sk-email", "naam": "E-mail marketing (Mailchimp & Klaviyo)", "niveau": "Advanced", "tags": ["e-mailmarketing", "email marketing", "mailchimp", "klaviyo", "nieuwsbrief", "crm", "automatisering"] },
+    { "id": "sk-crm", "naam": "Salesforce (CRM)", "niveau": "Tool", "tags": ["salesforce", "crm", "klantdata", "sales"] },
+    { "id": "sk-content", "naam": "Content creation & design (Canva)", "niveau": "Advanced", "tags": ["content", "content creatie", "content creation", "canva", "design", "video", "beeld", "creatief"] },
+    { "id": "sk-branding", "naam": "Branding & marketing strategy", "niveau": "Advanced", "tags": ["branding", "merk", "rebranding", "marketingstrategie", "brand strategy", "b2b", "b2c", "positionering"] },
+    { "id": "sk-comm", "naam": "Communication & stakeholder management", "niveau": "Strong", "tags": ["communicatie", "communication", "b2b", "b2c", "stakeholders", "klantcontact", "presenteren"] },
+    { "id": "sk-talen", "naam": "Languages: Dutch (native), English (native), German (A2)", "niveau": "Languages", "tags": ["nederlands", "dutch", "engels", "english", "duits", "german", "meertalig", "intercultureel"] },
+    { "id": "cert-green", "naam": "Green Ambassadors Certificate (17 SDGs) — Hanze", "niveau": "Certificate", "tags": ["duurzaamheid", "sustainability", "sdg", "certificaat", "green"] }
+  ],
+
+  "referenties": [
+    {
+      "id": "ref-puck",
+      "naam": "Puck Middelkoop",
+      "functie": "CEO",
+      "bedrijf": "Hulaaloop",
+      "relatie": "Manager at Hulaaloop",
+      "citaat": "",
+      "tags": ["marketing", "communicatie", "social media", "branding", "marketingstrategie"]
+    },
+    {
+      "id": "ref-ananda",
+      "naam": "Ananda van Doorn",
+      "functie": "CEO",
+      "bedrijf": "Reliving",
+      "relatie": "Internship supervisor at Reliving",
+      "citaat": "Een zeer enthousiaste en gemotiveerde professional die creatieve ideeën vertaalt naar concrete uitingen — een gewaardeerd onderdeel van onze marketingafdeling.",
+      "brief": "assets/refs/aanbeveling-ananda-van-doorn.pdf",
+      "tags": ["online marketing", "social media", "instagram", "google analytics", "e-mailmarketing", "e-commerce", "influencer marketing"]
+    },
+    {
+      "id": "ref-nick",
+      "naam": "Nick Vervoord",
+      "functie": "Owner",
+      "bedrijf": "RE/MAX Bonbini Curaçao",
+      "relatie": "Internship supervisor at RE/MAX Bonbini",
+      "citaat": "Innovatief en proactief: ze zag kansen, nam initiatief en zette ideeën om in concrete uitvoering. Een toevoeging voor iedere organisatie.",
+      "brief": "assets/refs/aanbeveling-nick-vervoord.pdf",
+      "tags": ["marketing", "social media", "video", "vastgoed", "real estate", "b2b", "b2c", "intercultureel"]
+    }
+  ]
+}

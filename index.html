@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carlijn Corporaal — Portfolio</title>
+  <meta name="description" content="Interactive portfolio of Carlijn Corporaal — marketing & communication. Tailors itself to your vacancy." />
+  <link rel="stylesheet" href="css/style.css" />
+
+  <!-- pdf.js: alleen om een vacature-PDF client-side uit te lezen. Niets wordt geüpload. -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    if (window.pdfjsLib) {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="#/" data-nav>
+        <span class="brand-mark">CC</span>
+        <span class="brand-text">Carlijn Corporaal</span>
+      </a>
+
+      <button class="nav-toggle" id="nav-toggle" aria-label="Menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+
+      <nav class="site-nav" id="site-nav">
+        <a href="#/"            data-route="/"            data-nav data-i18n="navHome">Home</a>
+        <a href="#/experience"  data-route="/experience"  data-nav data-i18n="navExp">Experience</a>
+        <a href="#/projects"    data-route="/projects"    data-nav data-i18n="navProj">Projects</a>
+        <a href="#/skills"      data-route="/skills"      data-nav data-i18n="navSkills">Skills</a>
+        <a href="#/references"  data-route="/references"  data-nav data-i18n="navRefs">References</a>
+        <a href="#/match"       data-route="/match"       data-nav class="nav-cta" data-i18n="navMatch">Vacancy match</a>
+        <span class="lang-switch" role="group" aria-label="Language">
+          <button class="lang-btn" data-lang="en">EN</button>
+          <button class="lang-btn" data-lang="nl">NL</button>
+        </span>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Status-balk: laat zien of de site op een vacature is afgestemd -->
+  <div class="tailor-bar no-print" id="tailor-bar" hidden></div>
+
+  <main id="app" class="app-main"><!-- views worden hier gerenderd --></main>
+
+  <footer class="site-footer no-print">
+    <div class="wrap footer-inner">
+      <span>© <span id="year"></span> Carlijn Corporaal</span>
+      <span class="footer-meta" data-i18n="footerMeta">Client-side portfolio · your vacancy text never leaves the browser.</span>
+    </div>
+  </footer>
+
+  <script src="js/matching.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
