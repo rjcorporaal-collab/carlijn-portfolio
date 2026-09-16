@@ -209,7 +209,7 @@
   let _revealObs = null;
   function bindReveal() {
     if (_revealObs) _revealObs.disconnect();
-    const els = $$('.card, .gallery-item, .page-head, .detail-block, .detail-cover, .detail-result, .detail-gallery-wrap, .work-band, .about-body, .letter-body, .contact-band');
+    const els = $$('.card, .gallery-item, .page-head, .detail-block, .detail-cover, .detail-result, .detail-gallery-wrap, .work-band, .about-body, .letter-body');
     if (!('IntersectionObserver' in window)) { els.forEach(e => e.classList.add('in')); return; }
     _revealObs = new IntersectionObserver(entries => {
       entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); _revealObs.unobserve(e.target); } });
@@ -271,9 +271,7 @@
           <span class="mw-meta">${escapeHtml([it.rol, it.periode].filter(Boolean).join(' · '))}</span>
           <span class="mw-arrow" aria-hidden="true">→</span></a>`).join('')}
       </div>
-    </section>` : ''}
-
-    ${contactBand()}`;
+    </section>` : ''}`;
   }
 
   /* ---- Eén projectband op de index (kleurblok) -------------------------- */
@@ -305,15 +303,6 @@
     </section>`;
   }
 
-  /* ---- Contactband: Let's. build. something. together. ------------------ */
-  function contactBand() {
-    return `<section class="contact-band">
-      <p class="contact-head">${t('buildTogether')}</p>
-      <p class="contact-sub">${t('getInTouch')}</p>
-      <div class="contact-btns">${contactButtons()}</div>
-    </section>`;
-  }
-
   /* ---- Over mij --------------------------------------------------------- */
   function renderAbout() {
     const a = state.pakket.about || {};
@@ -332,7 +321,6 @@
           ${a.foto ? `<img class="about-photo" src="${escapeAttr(a.foto)}" alt="Carlijn Corporaal" loading="lazy" />` : ''}
         </div>
       </section>
-      ${contactBand()}
     </article>`;
   }
 
@@ -356,7 +344,6 @@
         ${Array.isArray(it.ondertekening) ? `<p class="letter-sign">${it.ondertekening.map(escapeHtml).join('<br>')}</p>` : ''}
       </section>
       ${it.brief ? `<div class="letter-actions"><a class="wix-btn" href="${escapeAttr(it.brief)}" target="_blank" rel="noopener">${t('readPdf')}</a></div>` : ''}
-      ${contactBand()}
     </article>`;
   }
 
@@ -537,7 +524,6 @@
         ${gallery}
         <div class="tag-row">${tags}</div>
       </div>
-      ${contactBand()}
     </div>`;
   }
 

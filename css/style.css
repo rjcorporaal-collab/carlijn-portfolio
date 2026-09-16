@@ -122,7 +122,6 @@ button{ font:inherit; }
   border:2px solid var(--ink); padding:13px 22px; font-size:.78rem; text-transform:uppercase;
   letter-spacing:.1em; box-shadow:6px 6px 0 rgba(0,0,0,.25); transition:transform .12s ease, box-shadow .12s ease; }
 .wix-btn:hover{ text-decoration:none; transform:translate(3px,3px); box-shadow:2px 2px 0 rgba(0,0,0,.25); }
-.contact-band .wix-btn,
 .band-green .wix-btn,
 .band-yellow .wix-btn{ background:var(--paper); color:var(--ink)!important; }
 
@@ -137,6 +136,10 @@ button{ font:inherit; }
   text-transform:uppercase; line-height:1.25; }
 .hero-tagline{ margin:0; color:var(--magenta); font-size:clamp(1.1rem,2.3vw,1.7rem);
   line-height:1.15; max-width:26ch; }
+@media (max-width:640px){
+  .hero-row{ flex-direction:column; gap:14px; }
+  .hero-role{ max-width:none; }
+}
 
 /* ===========================================================================
  * Home / Projecten — de projectbanden
@@ -190,17 +193,6 @@ button{ font:inherit; }
   .more-work-item{ grid-template-columns:1fr 2rem; }
   .mw-meta{ grid-column:1; }
 }
-
-/* ===========================================================================
- * Contactband
- * ======================================================================== */
-.contact-band{ background:var(--paper); border-top:3px solid var(--ink);
-  padding:clamp(34px,6vw,80px) var(--gut); }
-.contact-head{ font-family:var(--font-display); font-size:clamp(1.5rem,5vw,3.4rem);
-  line-height:.95; letter-spacing:-.03em; margin:0 0 6px; }
-.contact-sub{ color:var(--magenta); font-size:clamp(1rem,2vw,1.4rem); margin:0 0 26px; }
-.contact-btns{ display:flex; flex-wrap:wrap; gap:14px; }
-.contact-band .wix-btn{ border-width:3px; }
 
 /* ===========================================================================
  * Over mij
@@ -408,7 +400,7 @@ button{ font:inherit; }
 .site-footer a{ color:var(--paper); }
 .footer-inner{ max-width:var(--maxw); margin:0 auto;
   padding:clamp(34px,5vw,70px) var(--gut) clamp(22px,3vw,34px); }
-.footer-head{ font-family:var(--font-display); text-transform:uppercase;
+.footer-head{ font-family:var(--font-display);
   font-size:clamp(1.5rem,5.2vw,3.6rem); line-height:.95; letter-spacing:-.03em; margin:0 0 6px; }
 .footer-sub{ color:var(--green); font-size:clamp(1rem,2vw,1.4rem); margin:0 0 26px; }
 .footer-links{ display:flex; flex-wrap:wrap; gap:14px; margin-bottom:34px; }
@@ -424,7 +416,7 @@ button{ font:inherit; }
  * ======================================================================== */
 @media print{
   .no-print,.site-header,.nav-toggle,.lightbox,
-  .bm-arrow,.bm-dots,.contact-band,.back-link{ display:none!important; }
+  .bm-arrow,.bm-dots,.back-link{ display:none!important; }
   body{ background:#fff; color:#000; font-size:11pt; }
   .work-band,.about-body,.letter-body,.detail-sheet,.card,.notice{
     background:#fff!important; border-color:#000!important;
