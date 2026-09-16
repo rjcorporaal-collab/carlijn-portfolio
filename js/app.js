@@ -1,10 +1,9 @@
 /* =============================================================================
- * app.js — Interactieve multi-page portfolio (client-side, hash-routing)
+ * app.js — Portfolio Carlijn Corporaal (client-side, hash-routing)
  * -----------------------------------------------------------------------------
- * Eén vacature-invoer stemt de HELE site af: elke pagina (Experience, Projects,
- * Skills, References) herrangschikt en markeert de meest relevante items, met
- * matchscores. De vacature-state blijft bewaard tussen pagina's (localStorage).
- * Leunt op MatchingEngine (matching.js). Geen server, geen API-calls.
+ * Alle inhoud komt uit data/pakket.json. Geen server, geen API-calls,
+ * geen tracking. Pagina's: home (kleurindex), case, al het werk, about me,
+ * aanbevelingsbrief, experience, skills, references.
  * ========================================================================== */
 
 (function () {
@@ -13,14 +12,11 @@
   const $  = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 
-  const STORE = { vacancy: 'cc_vacancy_text', lang: 'cc_lang', onlyRel: 'cc_only_relevant' };
+  const STORE = { lang: 'cc_lang' };
 
   const state = {
     pakket: null,
-    vacancyText: localStorage.getItem(STORE.vacancy) || '',
-    result: null,
     lang: localStorage.getItem(STORE.lang) || 'en',
-    onlyRelevant: localStorage.getItem(STORE.onlyRel) === '1',
     _rotTimers: [],
     _bmTimer: null
   };
@@ -28,86 +24,43 @@
   /* ---- Interface-teksten (labels; content komt uit pakket.json) ---------- */
   const I18N = {
     en: {
-      navHome:'Home', navExp:'Experience', navProj:'Projects', navSkills:'Skills',
-      navRefs:'References', navMatch:'VACANCY MATCH', navAbout:'ABOUT ME', navAllWork:'ALL WORK',
+      navHome:'Home', navAbout:'ABOUT ME', navAllWork:'ALL WORK', navExp:'EXPERIENCE',
+      navSkills:'SKILLS', navRefs:'REFERENCES',
+      navLetter1:'LETTER OF RECOMMENDATION (1)', navLetter2:'LETTER OF RECOMMENDATION (2)',
       callMe:'CALL ME', emailMe:'EMAIL ME', connectMe:'CONNECT ME',
       getInTouch:"Let's. get. in. touch.", buildTogether:'Let’s. build. something. together.',
-      aboutTitle:'About me', lettersTitle:'Letters of recommendation',
-      navLetter1:'LETTER OF RECOMMENDATION (1)', navLetter2:'LETTER OF RECOMMENDATION (2)',
-      roleWord:'ROLE', viewProjectIdx:'View Project', featuredWork:'Selected work', moreWork:'More work',
-      letterKicker:'Letter of Recommendation', readPdf:'Read the original (PDF)', backToRefs:'← All references',
-      teaserKicker:'Vacancy match', teaserPitch:'Paste a job description and this whole portfolio re-sorts itself around it. Nothing leaves your browser.',
-      teaserCta:'Match my vacancy',
-      footerMeta:'Client-side portfolio · your vacancy text never leaves the browser.',
-      heroCtaPortfolio:'View portfolio', heroCtaMatch:'Match with a vacancy',
       available:'Available from September 2026',
-      statExp:'Roles', statProj:'Projects', statSkills:'Skills & tools', statLang:'Languages',
-      focus:'Focus areas', selectedWork:'Selected work', viewProjects:'View all projects',
-      tailoredTo:'Tailored to', matchWord:'match', change:'Change', clear:'Clear',
-      setVacancy:'Set a vacancy to tailor this portfolio.', enterVacancy:'Enter vacancy',
-      seeMatch:'See full match analysis',
       expTitle:'Experience', projTitle:'Projects', skillsTitle:'Skills & tools', refsTitle:'References',
-      onlyRelevant:'Only relevant', showAll:'Show all', sortedByRelevance:'Sorted by relevance to your vacancy',
-      matchTitle:'Match your vacancy', matchIntro:'Paste a job description (or upload a .txt/.pdf). The whole portfolio adapts instantly — nothing is sent to a server.',
-      placeholder:'Paste the job description here…', upload:'Upload .txt or .pdf', clearInput:'Clear', trySample:'Try a sample',
-      overall:'Overall match', reqTitle:'Requirements ↔ Carlijn\'s experience', keywords:'Detected keywords',
-      relevantExperience:'Best match', noMatchForReq:'No direct match found.', downloadPdf:'Download summary as PDF',
-      emptyMatch:'Enter a vacancy above to generate a tailored match analysis.',
-      privacy:'🔒 Your vacancy text stays in your browser.',
-      noResults:'No items match this vacancy yet — showing the full overview.',
-      references:'References', relation:'Relation', backHome:'Back to home', readLetter:'Read recommendation letter',
-      viewProject:'View project', backToExp:'← Back to experience', backToProjects:'← Back to projects', projectVisuals:'Visuals from the project', noVisuals:'Add page images to assets/broadcast/ to fill this gallery.', result:'Result',
+      selectedWork:'Selected work', moreWork:'More work',
+      roleWord:'ROLE', viewProjectIdx:'View Project',
+      letterKicker:'Letter of Recommendation', readLetter:'Read recommendation letter',
+      readPdf:'Read the original (PDF)', backToRefs:'← All references',
+      backToProjects:'← Back to projects', projectVisuals:'Visuals from the project',
+      noVisuals:'Add page images to assets/broadcast/ to fill this gallery.', result:'Result',
+      relation:'Relation', emptyList:'Nothing here yet.',
+      footerMeta:'Static portfolio · no tracking, no cookies.',
       loadError:'Could not load pakket.json. Run the site via a local web server (see README).'
     },
     nl: {
-      navHome:'Home', navExp:'Ervaring', navProj:'Projecten', navSkills:'Vaardigheden',
-      navRefs:'Referenties', navMatch:'VACATURE-MATCH', navAbout:'OVER MIJ', navAllWork:'AL HET WERK',
+      navHome:'Home', navAbout:'OVER MIJ', navAllWork:'AL HET WERK', navExp:'ERVARING',
+      navSkills:'VAARDIGHEDEN', navRefs:'REFERENTIES',
+      navLetter1:'AANBEVELINGSBRIEF (1)', navLetter2:'AANBEVELINGSBRIEF (2)',
       callMe:'BEL ME', emailMe:'MAIL ME', connectMe:'CONNECT MET ME',
       getInTouch:"Let's. get. in. touch.", buildTogether:'Let’s. build. something. together.',
-      aboutTitle:'Over mij', lettersTitle:'Aanbevelingsbrieven',
-      navLetter1:'AANBEVELINGSBRIEF (1)', navLetter2:'AANBEVELINGSBRIEF (2)',
-      roleWord:'ROL', viewProjectIdx:'Bekijk project', featuredWork:'Uitgelicht werk', moreWork:'Meer werk',
-      letterKicker:'Aanbevelingsbrief', readPdf:'Lees het origineel (PDF)', backToRefs:'← Alle referenties',
-      teaserKicker:'Vacature-match', teaserPitch:'Plak een vacaturetekst en dit hele portfolio herordent zich eromheen. Niets verlaat je browser.',
-      teaserCta:'Match mijn vacature',
-      footerMeta:'Client-side portfolio · je vacaturetekst verlaat je browser niet.',
-      heroCtaPortfolio:'Bekijk portfolio', heroCtaMatch:'Match met een vacature',
       available:'Beschikbaar vanaf september 2026',
-      statExp:'Functies', statProj:'Projecten', statSkills:'Skills & tools', statLang:'Talen',
-      focus:'Focusgebieden', selectedWork:'Uitgelicht werk', viewProjects:'Bekijk alle projecten',
-      tailoredTo:'Afgestemd op', matchWord:'match', change:'Wijzig', clear:'Wis',
-      setVacancy:'Stel een vacature in om dit portfolio op maat te maken.', enterVacancy:'Vacature invoeren',
-      seeMatch:'Bekijk volledige match-analyse',
       expTitle:'Ervaring', projTitle:'Projecten', skillsTitle:'Vaardigheden & tools', refsTitle:'Referenties',
-      onlyRelevant:'Alleen relevant', showAll:'Toon alles', sortedByRelevance:'Gesorteerd op relevantie voor je vacature',
-      matchTitle:'Match je vacature', matchIntro:'Plak een vacaturetekst (of upload een .txt/.pdf). Het hele portfolio past zich direct aan — er wordt niets naar een server gestuurd.',
-      placeholder:'Plak hier de vacaturetekst…', upload:'Upload .txt of .pdf', clearInput:'Wissen', trySample:'Voorbeeld proberen',
-      overall:'Totale match', reqTitle:'Eisen ↔ Carlijns ervaring', keywords:'Herkende trefwoorden',
-      relevantExperience:'Beste match', noMatchForReq:'Geen directe match gevonden.', downloadPdf:'Download samenvatting als PDF',
-      emptyMatch:'Voer hierboven een vacature in voor een match-analyse op maat.',
-      privacy:'🔒 Je vacaturetekst blijft in je browser.',
-      noResults:'Nog geen items matchen deze vacature — het volledige overzicht wordt getoond.',
-      references:'Referenties', relation:'Relatie', backHome:'Terug naar home', readLetter:'Lees aanbevelingsbrief',
-      viewProject:'Bekijk project', backToExp:'← Terug naar ervaring', backToProjects:'← Terug naar projecten', projectVisuals:'Visuals uit het project', noVisuals:'Zet pagina-afbeeldingen in assets/broadcast/ om deze galerij te vullen.', result:'Resultaat',
+      selectedWork:'Uitgelicht werk', moreWork:'Meer werk',
+      roleWord:'ROL', viewProjectIdx:'Bekijk project',
+      letterKicker:'Aanbevelingsbrief', readLetter:'Lees de aanbevelingsbrief',
+      readPdf:'Lees het origineel (PDF)', backToRefs:'← Alle referenties',
+      backToProjects:'← Terug naar projecten', projectVisuals:'Visuals uit het project',
+      noVisuals:'Zet pagina-afbeeldingen in assets/broadcast/ om deze galerij te vullen.', result:'Resultaat',
+      relation:'Relatie', emptyList:'Hier staat nog niets.',
+      footerMeta:'Statisch portfolio · geen tracking, geen cookies.',
       loadError:'Kon pakket.json niet laden. Draai de site via een lokale webserver (zie README).'
     }
   };
   const t = k => (I18N[state.lang] && I18N[state.lang][k]) || I18N.en[k] || k;
-
-  /* ---- Voorbeeldvacature (voor de "Try a sample"-knop) ------------------- */
-  const SAMPLE_VACANCY = `Social Media & Content Marketeer (Amsterdam)
-
-Voor een groeiend e-commercemerk zoeken wij een creatieve social media marketeer.
-
-Wat vraag wij:
-- Aantoonbare ervaring met social media en contentmarketing (Instagram, TikTok)
-- Ervaring met influencer marketing en het laten groeien van een community
-- Kennis van Google Analytics en e-mailmarketing (Mailchimp of Klaviyo)
-- Je maakt zelf content en videocampagnes
-- Ervaring met branding en marketingstrategie is een pre
-- Uitstekende communicatie in Nederlands en Engels
-
-Wat bieden wij: een creatieve rol in e-commerce met veel eigen verantwoordelijkheid.`;
 
   /* ======================================================================
    * Opstarten
@@ -124,7 +77,6 @@ Wat bieden wij: een creatieve rol in e-commerce met veel eigen verantwoordelijkh
       $('#app').innerHTML = `<div class="wrap"><div class="notice error">${escapeHtml(t('loadError'))}<br><small>${escapeHtml(String(err))}</small></div></div>`;
       console.error(err); return;
     }
-    computeResult();
     renderFooterLinks();
     bindLightbox();
     window.addEventListener('hashchange', router);
@@ -162,8 +114,8 @@ Wat bieden wij: een creatieve rol in e-commerce met veel eigen verantwoordelijkh
     document.body.style.overflow = '';
   }
 
+  /* ---- Header / taal ----------------------------------------------------- */
   function bindHeader() {
-    // Mobiele nav
     const toggle = $('#nav-toggle'), nav = $('#site-nav');
     toggle.addEventListener('click', () => {
       const open = nav.classList.toggle('open');
@@ -172,8 +124,19 @@ Wat bieden wij: een creatieve rol in e-commerce met veel eigen verantwoordelijkh
     $$('[data-nav]').forEach(a => a.addEventListener('click', () => {
       nav.classList.remove('open'); toggle.setAttribute('aria-expanded', 'false');
     }));
-    // Taal
     $$('.lang-btn').forEach(b => b.addEventListener('click', () => setLang(b.dataset.lang)));
+  }
+
+  function setLang(lang) {
+    state.lang = lang; localStorage.setItem(STORE.lang, lang);
+    document.documentElement.lang = lang;
+    applyLangLabels(); renderFooterLinks(); router();
+  }
+
+  function applyLangLabels() {
+    $$('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+    $$('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === state.lang));
+    document.documentElement.lang = state.lang;
   }
 
   /* ---- Footer: contactknoppen (CALL / EMAIL / CONNECT) ------------------ */
@@ -195,53 +158,21 @@ Wat bieden wij: een creatieve rol in e-commerce met veel eigen verantwoordelijkh
     ].join('');
   }
 
-  function setLang(lang) {
-    state.lang = lang; localStorage.setItem(STORE.lang, lang);
-    document.documentElement.lang = lang;
-    applyLangLabels(); renderFooterLinks(); router();
-  }
-
-  function applyLangLabels() {
-    $$('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
-    $$('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === state.lang));
-    document.documentElement.lang = state.lang;
-  }
-
-  /* ---- Vacature-state ---------------------------------------------------- */
-  function computeResult() {
-    const text = (state.vacancyText || '').trim();
-    state.result = (text && state.pakket)
-      ? window.MatchingEngine.analyseVacature(state.pakket, text) : null;
-  }
-  function setVacancy(text) {
-    state.vacancyText = text || '';
-    localStorage.setItem(STORE.vacancy, state.vacancyText);
-    computeResult();
-  }
-  function clearVacancy() {
-    state.vacancyText = ''; localStorage.removeItem(STORE.vacancy);
-    state.result = null;
-  }
-
-  // Items van een sectie: gesorteerd + met percentage als er een vacature is,
-  // anders de originele volgorde met percentage = null.
+  // Items van een sectie in de volgorde zoals ze in pakket.json staan.
   function getSection(type) {
-    if (state.result) return state.result.scored[type];
-    const items = Array.isArray(state.pakket[type]) ? state.pakket[type] : [];
-    return items.map(item => ({ item, percentage: null, matchedTerms: [] }));
+    return Array.isArray(state.pakket[type]) ? state.pakket[type] : [];
   }
 
   /* ======================================================================
    * Router
    * ==================================================================== */
   const ROUTES = {
-    '/':                 renderHome,
-    '/experience':       renderExperience,
-    '/projects':         renderProjects,
-    '/skills':           renderSkills,
-    '/references':       renderReferences,
-    '/about':            renderAbout,
-    '/match':            renderMatch
+    '/':           renderHome,
+    '/projects':   renderProjects,
+    '/about':      renderAbout,
+    '/experience': renderExperience,
+    '/skills':     renderSkills,
+    '/references': renderReferences
   };
 
   // Detailpagina-id uit een route halen (bv. "/project/pr-broadcast" → "pr-broadcast").
@@ -256,6 +187,8 @@ Wat bieden wij: een creatieve rol in e-commerce met veel eigen verantwoordelijkh
     const route = (location.hash.replace(/^#/, '') || '/').split('?')[0];
     const pid = projectRouteId(route);
     const lid = (route.match(/^\/letter\/(.+)$/) || [])[1] || null;
+    // Onbekende route (bv. een oude #/match-link) → netjes terug naar home.
+    if (!pid && !lid && !ROUTES[route] && route !== '/') { location.hash = '#/'; return; }
     const view = pid ? () => renderProjectDetail(pid)
       : lid ? () => renderLetter(lid)
       : (ROUTES[route] || renderHome);
@@ -266,7 +199,6 @@ Wat bieden wij: een creatieve rol in e-commerce met veel eigen verantwoordelijkh
     app.classList.add('fade-in');
     // Actieve nav
     $$('[data-route]').forEach(a => a.classList.toggle('active', a.dataset.route === route));
-    renderTailorBar(route);
     bindViewEvents(route);
     bindRotators();
     window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
@@ -277,7 +209,7 @@ Wat bieden wij: een creatieve rol in e-commerce met veel eigen verantwoordelijkh
   let _revealObs = null;
   function bindReveal() {
     if (_revealObs) _revealObs.disconnect();
-    const els = $$('.card, .stat, .gallery-item, .block, .home-match, .match-head, .page-head, .chips, .home-focus, .detail-block, .detail-cover, .detail-result, .detail-gallery-wrap, .work-band, .about-body, .letter-body, .contact-band, .match-teaser');
+    const els = $$('.card, .gallery-item, .page-head, .detail-block, .detail-cover, .detail-result, .detail-gallery-wrap, .work-band, .about-body, .letter-body, .contact-band');
     if (!('IntersectionObserver' in window)) { els.forEach(e => e.classList.add('in')); return; }
     _revealObs = new IntersectionObserver(entries => {
       entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); _revealObs.unobserve(e.target); } });
@@ -309,39 +241,15 @@ Wat bieden wij: een creatieve rol in e-commerce met veel eigen verantwoordelijkh
     }));
   }
 
-  /* ---- Status-balk ------------------------------------------------------- */
-  function renderTailorBar(route) {
-    const bar = $('#tailor-bar');
-    if (route === '/match') { bar.hidden = true; return; }
-    bar.hidden = false;
-    if (state.result) {
-      const jt = state.result.jobTitle ? escapeHtml(state.result.jobTitle) : '—';
-      bar.className = 'tailor-bar active no-print';
-      bar.innerHTML = `<div class="wrap tailor-inner">
-        <span class="tailor-text">✓ ${t('tailoredTo')}: <strong>${jt}</strong>
-          <span class="tailor-score">${state.result.overall}% ${t('matchWord')}</span></span>
-        <span class="tailor-actions">
-          <a href="#/match">${t('change')}</a>
-          <button type="button" id="tailor-clear">${t('clear')}</button>
-        </span></div>`;
-      $('#tailor-clear').addEventListener('click', () => { clearVacancy(); router(); });
-    } else {
-      bar.className = 'tailor-bar no-print';
-      bar.innerHTML = `<div class="wrap tailor-inner">
-        <span class="tailor-text">💡 ${t('setVacancy')}</span>
-        <span class="tailor-actions"><a href="#/match" class="tailor-cta">${t('enterVacancy')} →</a></span>
-      </div>`;
-    }
-  }
-
   /* ======================================================================
    * Views
    * ==================================================================== */
   function renderHome() {
     const p = state.pakket.profiel || {};
     const naam = p.naamDisplay || (p.naam || '').toUpperCase();
-    const featured = getSection('projecten').filter(s => s.item && s.item.uitgelicht);
-    const rest = getSection('projecten').filter(s => !(s.item && s.item.uitgelicht));
+    const projecten = getSection('projecten');
+    const featured = projecten.filter(it => it.uitgelicht);
+    const rest = projecten.filter(it => !it.uitgelicht);
 
     return `<section class="hero-wix">
       <h1 class="hero-huge">${escapeHtml(naam)}</h1>
@@ -351,18 +259,16 @@ Wat bieden wij: een creatieve rol in e-commerce met veel eigen verantwoordelijkh
       </div>
     </section>
 
-    ${matchTeaser()}
-
     <div class="work-index">
-      ${featured.map((s, i) => workBand(s, i)).join('')}
+      ${featured.map((it, i) => workBand(it, i)).join('')}
     </div>
 
     ${rest.length ? `<section class="more-work">
       <h2>${t('moreWork')}</h2>
       <div class="more-work-list">
-        ${rest.map(s => `<a class="more-work-item" href="${escapeAttr(s.item.detailpagina || '#/projects')}">
-          <span class="mw-title">${escapeHtml(s.item.titel || '')}</span>
-          <span class="mw-meta">${escapeHtml([s.item.rol, s.item.periode].filter(Boolean).join(' · '))}</span>
+        ${rest.map(it => `<a class="more-work-item" href="${escapeAttr(it.detailpagina || '#/projects')}">
+          <span class="mw-title">${escapeHtml(it.titel || '')}</span>
+          <span class="mw-meta">${escapeHtml([it.rol, it.periode].filter(Boolean).join(' · '))}</span>
           <span class="mw-arrow" aria-hidden="true">→</span></a>`).join('')}
       </div>
     </section>` : ''}
@@ -370,24 +276,20 @@ Wat bieden wij: een creatieve rol in e-commerce met veel eigen verantwoordelijkh
     ${contactBand()}`;
   }
 
-  /* ---- Eén projectband op de index (kleurblok, zoals op de Wix-site) ---- */
-  function workBand(s, i) {
-    const it = s.item || {};
-    const nr = typeof i === 'number' ? '(' + (i + 1) + ')' : (it.nummer || '');
+  /* ---- Eén projectband op de index (kleurblok) -------------------------- */
+  function workBand(it, i) {
     const href = escapeAttr(it.detailpagina || '#/projects');
+    const nr = typeof i === 'number' ? '(' + (i + 1) + ')' : (it.nummer || '');
     const imgs = itemImages(it);
     const cover = imgs.length
       ? `<img class="panel-img" src="${escapeAttr(imgs[0])}" alt="${escapeAttr(it.titel || '')}" loading="lazy" />`
       : '';
-    const score = s.percentage == null ? ''
-      : `<span class="band-score ${heat(s.percentage)}">${s.percentage}% ${t('matchWord')}</span>`;
     return `<section class="work-band band-${escapeAttr(it.kleur || 'yellow')}">
       <div class="band-row">
         <span class="band-num">${escapeHtml(nr)}</span>
         <a class="band-title" href="${href}">${escapeHtml(it.titel || '')}</a>
         <a class="band-link" href="${href}">${t('viewProjectIdx')}</a>
         <span class="band-emoji" aria-hidden="true">(${escapeHtml(it.emoji || '')})</span>
-        ${score}
       </div>
       <a class="band-panel panel-${escapeAttr(it.paneel || 'magenta')}" href="${href}"
          aria-label="${escapeAttr(it.titel || '')}">
@@ -400,26 +302,6 @@ Wat bieden wij: een creatieve rol in e-commerce met veel eigen verantwoordelijkh
           ${it.type ? `<span>${escapeHtml(it.typeLabel || 'TYPE')}: ${escapeHtml(it.type)}</span>` : ''}
         </span>
       </a>
-    </section>`;
-  }
-
-  /* ---- Zwarte band met de vacature-match (het eigen extraatje) ---------- */
-  function matchTeaser() {
-    const r = state.result;
-    if (r) {
-      const top = r.scored.werkervaring[0] || r.scored.projecten[0];
-      return `<section class="match-teaser tailored">
-        <span class="teaser-kicker">${t('teaserKicker')}</span>
-        <p class="teaser-line">${t('tailoredTo')}: <strong>${escapeHtml(r.jobTitle || '—')}</strong>
-          <em>${r.overall}% ${t('matchWord')}</em></p>
-        ${top ? `<p class="teaser-sub">${t('relevantExperience')}: <strong>${escapeHtml(itemLabel(top.item))}</strong></p>` : ''}
-        <a class="wix-btn" href="#/match">${t('seeMatch')}</a>
-      </section>`;
-    }
-    return `<section class="match-teaser">
-      <span class="teaser-kicker">${t('teaserKicker')}</span>
-      <p class="teaser-line">${escapeHtml(t('teaserPitch'))}</p>
-      <a class="wix-btn" href="#/match">${t('teaserCta')}</a>
     </section>`;
   }
 
@@ -456,7 +338,7 @@ Wat bieden wij: een creatieve rol in e-commerce met veel eigen verantwoordelijkh
 
   /* ---- Aanbevelingsbrief (eigen pagina per brief) ----------------------- */
   function renderLetter(id) {
-    const list = state.pakket.referenties || [];
+    const list = getSection('referenties');
     const it = list.find(r => r.id === id);
     if (!it) { location.hash = '#/references'; return ''; }
     const idx = list.filter(r => r.brieftekst).indexOf(it);
@@ -470,12 +352,21 @@ Wat bieden wij: een creatieve rol in e-commerce met veel eigen verantwoordelijkh
         <p class="letter-role">${escapeHtml([it.functie, it.bedrijf].filter(Boolean).join(' · '))}</p>
       </header>
       <section class="letter-body band-${kleur}">
-        ${paras || `<p>${escapeHtml(t('noResults'))}</p>`}
+        ${paras || `<p>${escapeHtml(t('emptyList'))}</p>`}
         ${Array.isArray(it.ondertekening) ? `<p class="letter-sign">${it.ondertekening.map(escapeHtml).join('<br>')}</p>` : ''}
       </section>
       ${it.brief ? `<div class="letter-actions"><a class="wix-btn" href="${escapeAttr(it.brief)}" target="_blank" rel="noopener">${t('readPdf')}</a></div>` : ''}
       ${contactBand()}
     </article>`;
+  }
+
+  /* ---- Al het werk ------------------------------------------------------ */
+  function renderProjects() {
+    const items = getSection('projecten');
+    return pageShell(t('projTitle'),
+      `<div class="work-index">${items.map((it, i) => workBand(it, i)).join('')}</div>
+       ${items.length ? '' : emptyNote()}
+       ${galleryBlock()}`);
   }
 
   function galleryBlock() {
@@ -494,76 +385,63 @@ Wat bieden wij: een creatieve rol in e-commerce met veel eigen verantwoordelijkh
     </div>`;
   }
 
+  /* ---- Ervaring --------------------------------------------------------- */
   function renderExperience() {
-    const items = filterRel(getSection('werkervaring'));
-    return pageShell(t('expTitle'), relControls(), `
+    const items = getSection('werkervaring');
+    return pageShell(t('expTitle'), `
       <div class="timeline">
         ${items.map(expCard).join('') || emptyNote()}
       </div>`);
   }
 
-  function expCard(s) {
-    const it = s.item;
+  function expCard(it) {
     const imgs = itemImages(it);
     return `<article class="tl-item card ${imgs.length?'has-cover':''}">
-      <div class="tl-dot"></div>
       ${renderRotator(imgs, 'card-cover cover-wide', (it.functie||'')+' — '+(it.bedrijf||''))}
-      ${badgeAndBar(s)}
       <h3>${escapeHtml(it.functie||'')}</h3>
       <p class="card-meta">${escapeHtml([it.bedrijf, it.branche, it.periode].filter(Boolean).join(' · '))}</p>
       ${it.impressie ? `<p class="card-impressie">${escapeHtml(it.impressie)}</p>` : ''}
       ${it.resultaat ? `<p class="card-result">✔ ${escapeHtml(it.resultaat)}</p>` : ''}
       ${Array.isArray(it.verantwoordelijkheden) ? `<ul class="card-list">${it.verantwoordelijkheden.map(v=>`<li>${escapeHtml(v)}</li>`).join('')}</ul>` : ''}
-      ${tagRow(it.tags, s.matchedTerms)}
-      ${it.detailpagina ? `<a class="card-project-link" href="${escapeAttr(it.detailpagina)}">${t('viewProject')} →</a>` : ''}
+      ${tagRow(it.tags)}
+      ${it.detailpagina ? `<a class="card-project-link" href="${escapeAttr(it.detailpagina)}">${t('viewProjectIdx')} →</a>` : ''}
     </article>`;
   }
 
-  function renderProjects() {
-    const items = filterRel(getSection('projecten'));
-    return pageShell(t('projTitle'), relControls(),
-      `<div class="work-index">${items.map((s, i) => workBand(s, i)).join('')}</div>
-       ${items.length ? '' : emptyNote()}
-       ${galleryBlock()}`);
-  }
-
+  /* ---- Vaardigheden ----------------------------------------------------- */
   function renderSkills() {
-    const items = filterRel(getSection('vaardigheden'));
-    return pageShell(t('skillsTitle'), relControls(), `
+    const items = getSection('vaardigheden');
+    return pageShell(t('skillsTitle'), `
       <div class="cards-grid skills-grid">
         ${items.map(skillCard).join('') || emptyNote()}
       </div>`);
   }
 
-  function skillCard(s) {
-    const it = s.item;
-    return `<article class="card skill-card ${heat(s.percentage)}">
-      ${badgeAndBar(s)}
+  function skillCard(it) {
+    return `<article class="card skill-card">
       <h3>${escapeHtml(it.naam||'')}</h3>
       ${it.niveau ? `<p class="card-meta">${escapeHtml(it.niveau)}</p>` : ''}
-      ${tagRow(it.tags, s.matchedTerms)}
+      ${tagRow(it.tags)}
     </article>`;
   }
 
+  /* ---- Referenties ------------------------------------------------------ */
   function renderReferences() {
-    const items = getSection('referenties'); // referenties niet filteren, altijd tonen
-    // Referenties met een bijlage (aanbevelingsbrief) naast elkaar bovenaan,
-    // referenties zonder bijlage eronder.
+    const items = getSection('referenties');
+    // Referenties met een brief bovenaan, de rest eronder.
     const ordered = [
-      ...items.filter(s => s.item && s.item.brief),
-      ...items.filter(s => !(s.item && s.item.brief)),
+      ...items.filter(it => it.brieftekst || it.brief),
+      ...items.filter(it => !(it.brieftekst || it.brief)),
     ];
-    return pageShell(t('refsTitle'), '', `
+    return pageShell(t('refsTitle'), `
       <div class="cards-grid refs-grid">
-        ${ordered.map(refCard).join('')}
+        ${ordered.map(refCard).join('') || emptyNote()}
       </div>`);
   }
 
-  function refCard(s) {
-    const it = s.item;
+  function refCard(it) {
     const citaat = (it.citaat || '').trim();
     return `<article class="card ref-card${it.brieftekst ? '' : ' ref-card--full'}">
-      ${badgeAndBar(s)}
       ${it.nummer ? `<span class="ref-num">${escapeHtml(it.nummer)}</span>` : ''}
       ${citaat ? `<blockquote>“${escapeHtml(citaat)}”</blockquote>` : ''}
       <p class="ref-name"><strong>${escapeHtml(it.naam || '')}</strong></p>
@@ -574,16 +452,16 @@ Wat bieden wij: een creatieve rol in e-commerce met veel eigen verantwoordelijkh
     </article>`;
   }
 
-  /* ---- Projectdetail (generiek — zelfde rijke format voor élk project) --- */
+  /* ---- Projectdetail (zelfde rijke format voor élk project) ------------- */
   function findProject(id) {
-    return (state.pakket.projecten || []).find(w => w.id === id)
-      || (state.pakket.werkervaring || []).find(w => w.id === id) || null;
+    return getSection('projecten').find(w => w.id === id)
+      || getSection('werkervaring').find(w => w.id === id) || null;
   }
 
   // Terugval-inhoudsblokken als een project (nog) geen detail.blokken heeft.
   function synthBlocks(p) {
     const b = [];
-    if (p.beschrijving) b.push({ h: 'About', p: p.beschrijving });
+    if (p.beschrijving) b.push({ p: p.beschrijving });
     if (Array.isArray(p.verantwoordelijkheden) && p.verantwoordelijkheden.length)
       b.push({ h: 'Responsibilities', list: p.verantwoordelijkheden });
     return b;
@@ -595,7 +473,6 @@ Wat bieden wij: een creatieve rol in e-commerce met veel eigen verantwoordelijkh
     const d = it.detail || {};
     const kicker = escapeHtml([d.kicker, it.periode].filter(Boolean).join(' · '));
     const titleHtml = d.titelHtml || escapeHtml(it.titel || '');
-    const lead = it.impressie || it.beschrijving || '';
     const tags = (it.tags || []).slice(0, 10).map(x => `<span class="tag">${escapeHtml(x)}</span>`).join('');
     const blocks = (Array.isArray(d.blokken) && d.blokken.length ? d.blokken : synthBlocks(it))
       .map(b => `<div class="detail-block${b.h ? '' : ' detail-block--plain'}">${
@@ -654,7 +531,6 @@ Wat bieden wij: een creatieve rol in e-commerce met veel eigen verantwoordelijkh
         </header>
       </div>
       <div class="detail-sheet">
-        ${badgeAndBar(matchFor(it.id))}
         <section class="detail-body">${blocks}</section>
         ${result}
         ${cover}
@@ -749,212 +625,33 @@ Wat bieden wij: een creatieve rol in e-commerce met veel eigen verantwoordelijkh
     go(0); restart();
   }
 
-  function renderMatch() {
-    const r = state.result;
-    let output = '';
-    if (r) {
-      output = `<div class="match-output">
-        <section class="match-head card-elevated">
-          ${scoreDial(r.overall, t('overall'))}
-          <div class="match-head-text">
-            <p class="match-head-line">${t('tailoredTo')} <strong>${escapeHtml(r.jobTitle||'—')}</strong>${r.company?` · <strong>${escapeHtml(r.company)}</strong>`:''}</p>
-            <button type="button" class="btn btn-primary" id="pdf-btn">${t('downloadPdf')}</button>
-          </div>
-        </section>
-        ${r.requirements.length ? `<section class="block"><h3>${t('reqTitle')}</h3>
-          <div class="match-cards">${r.requirements.map(reqCard).join('')}</div></section>` : ''}
-        ${r.keywords.length ? `<section class="block"><h3>${t('keywords')}</h3>
-          <div class="chips">${r.keywords.slice(0,18).map(k=>`<span class="chip">${escapeHtml(k.term)}</span>`).join('')}</div></section>` : ''}
-        <section class="block quicklinks">
-          <a class="btn btn-ghost" href="#/experience">${t('navExp')} →</a>
-          <a class="btn btn-ghost" href="#/projects">${t('navProj')} →</a>
-          <a class="btn btn-ghost" href="#/skills">${t('navSkills')} →</a>
-        </section>
-      </div>`;
-    } else {
-      output = `<div class="empty-state">${escapeHtml(t('emptyMatch'))}</div>`;
-    }
-
-    return `<div class="wrap match-page">
-      <div class="page-head"><h1>${t('matchTitle')}</h1></div>
-      <p class="page-intro">${escapeHtml(t('matchIntro'))}</p>
-      <div class="match-input card">
-        <textarea id="vacancy-input" rows="9" spellcheck="false" placeholder="${escapeAttr(t('placeholder'))}">${escapeHtml(state.vacancyText)}</textarea>
-        <div class="match-input-actions">
-          <label class="file-upload btn btn-ghost">${t('upload')}
-            <input type="file" id="file-input" accept=".txt,.pdf,text/plain,application/pdf" hidden />
-          </label>
-          <button type="button" class="btn btn-ghost" id="sample-btn">${t('trySample')}</button>
-          <button type="button" class="btn btn-ghost" id="clear-input-btn">${t('clearInput')}</button>
-          <span class="privacy-note">${t('privacy')}</span>
-        </div>
-      </div>
-      ${output}
-    </div>`;
-  }
-
-  function reqCard(req) {
-    const m = req.match;
-    return `<div class="match-card ${m?'has-match':'no-match'}">
-      <div class="req-text">${escapeHtml(req.eis)}</div>
-      <div class="req-arrow" aria-hidden="true">↳</div>
-      ${m ? `<div class="req-match"><span class="req-match-label">${t('relevantExperience')}</span>
-        <strong>${escapeHtml(itemLabel(m.item))}</strong></div>`
-          : `<div class="req-match muted">${escapeHtml(t('noMatchForReq'))}</div>`}
-    </div>`;
-  }
-
   /* ======================================================================
    * View-events
    * ==================================================================== */
   function bindViewEvents(route) {
     if (route.indexOf('/project/') === 0) { bindProjectGallery(); }
-    if (route === '/match') {
-      const input = $('#vacancy-input');
-      if (input) {
-        input.addEventListener('input', debounce(() => { setVacancy(input.value); rerenderMatchOutput(); }, 250));
-        $('#file-input').addEventListener('change', onFileChosen);
-        $('#clear-input-btn').addEventListener('click', () => { input.value=''; setVacancy(''); rerenderMatchOutput(); input.focus(); });
-        $('#sample-btn').addEventListener('click', () => { input.value = SAMPLE_VACANCY; setVacancy(SAMPLE_VACANCY); rerenderMatchOutput(); });
-        const pdf = $('#pdf-btn'); if (pdf) pdf.addEventListener('click', () => window.print());
-      }
-    }
-    // relevantie-toggle (Experience/Projects/Skills)
-    const relToggle = $('#rel-toggle');
-    if (relToggle) relToggle.addEventListener('click', () => {
-      state.onlyRelevant = !state.onlyRelevant;
-      localStorage.setItem(STORE.onlyRel, state.onlyRelevant ? '1':'0');
-      router();
-    });
-  }
-
-  // Alleen het match-resultaat opnieuw renderen + status-balk bijwerken (geen full route reset,
-  // zodat de textarea-focus en cursorpositie behouden blijven).
-  function rerenderMatchOutput() {
-    const page = $('.match-page'); if (!page) { router(); return; }
-    // vervang alles ná .match-input
-    const old = page.querySelector('.match-output') || page.querySelector('.empty-state');
-    const wrap = document.createElement('div');
-    const r = state.result;
-    if (r) {
-      wrap.innerHTML = renderMatchOutputHtml(r);
-    } else {
-      wrap.innerHTML = `<div class="empty-state">${escapeHtml(t('emptyMatch'))}</div>`;
-    }
-    if (old) old.replaceWith(wrap.firstElementChild); else page.appendChild(wrap.firstElementChild);
-    const pdf = $('#pdf-btn'); if (pdf) pdf.addEventListener('click', () => window.print());
-    renderTailorBar('/match');
-  }
-  function renderMatchOutputHtml(r) {
-    return `<div class="match-output">
-      <section class="match-head card-elevated">
-        ${scoreDial(r.overall, t('overall'))}
-        <div class="match-head-text">
-          <p class="match-head-line">${t('tailoredTo')} <strong>${escapeHtml(r.jobTitle||'—')}</strong>${r.company?` · <strong>${escapeHtml(r.company)}</strong>`:''}</p>
-          <button type="button" class="btn btn-primary" id="pdf-btn">${t('downloadPdf')}</button>
-        </div>
-      </section>
-      ${r.requirements.length ? `<section class="block"><h3>${t('reqTitle')}</h3>
-        <div class="match-cards">${r.requirements.map(reqCard).join('')}</div></section>` : ''}
-      ${r.keywords.length ? `<section class="block"><h3>${t('keywords')}</h3>
-        <div class="chips">${r.keywords.slice(0,18).map(k=>`<span class="chip">${escapeHtml(k.term)}</span>`).join('')}</div></section>` : ''}
-      <section class="block quicklinks">
-        <a class="btn btn-ghost" href="#/experience">${t('navExp')} →</a>
-        <a class="btn btn-ghost" href="#/projects">${t('navProj')} →</a>
-        <a class="btn btn-ghost" href="#/skills">${t('navSkills')} →</a>
-      </section>
-    </div>`;
-  }
-
-  async function onFileChosen(e) {
-    const file = e.target.files && e.target.files[0]; if (!file) return;
-    try {
-      let text = '';
-      if (/\.pdf$/i.test(file.name) || file.type === 'application/pdf') text = await extractPdfText(file);
-      else text = await file.text();
-      const input = $('#vacancy-input'); input.value = text.trim();
-      setVacancy(input.value); rerenderMatchOutput();
-    } catch (err) { alert('Kon bestand niet lezen: ' + err.message); }
-    finally { e.target.value = ''; }
-  }
-  async function extractPdfText(file) {
-    if (!window.pdfjsLib) throw new Error('pdf.js niet geladen (offline? zie README).');
-    const buf = await file.arrayBuffer();
-    const pdf = await window.pdfjsLib.getDocument({ data: buf }).promise;
-    let out = '';
-    for (let p = 1; p <= pdf.numPages; p++) {
-      const page = await pdf.getPage(p);
-      const c = await page.getTextContent();
-      out += c.items.map(i => i.str).join(' ') + '\n';
-    }
-    return out;
   }
 
   /* ======================================================================
    * Gedeelde componenten
    * ==================================================================== */
-  function pageShell(title, controls, body) {
-    const note = state.result ? `<p class="page-intro">${t('sortedByRelevance')}</p>` : '';
+  function pageShell(title, body) {
     return `<div class="wrap page">
-      <div class="page-head"><h1>${escapeHtml(title)}</h1>${controls}</div>
-      ${note}
+      <div class="page-head"><h1>${escapeHtml(title)}</h1></div>
       ${body}
     </div>`;
   }
 
-  function relControls() {
-    if (!state.result) return '';
-    return `<button type="button" id="rel-toggle" class="toggle-btn ${state.onlyRelevant?'on':''}">
-      ${state.onlyRelevant ? t('showAll') : t('onlyRelevant')}</button>`;
-  }
-
-  function filterRel(list) {
-    if (state.result && state.onlyRelevant) {
-      const f = list.filter(s => s.percentage > 0);
-      return f.length ? f : list;
-    }
-    return list;
-  }
-
-  function badgeAndBar(s) {
-    if (s.percentage == null) return '';
-    return `<span class="score-badge ${heat(s.percentage)}">${s.percentage}%</span>
-      <span class="match-bar"><span class="match-bar-fill ${heat(s.percentage)}" style="width:${s.percentage}%"></span></span>`;
-  }
-
-  function scoreDial(pct, label) {
-    const deg = Math.round((pct/100)*360);
-    return `<div class="score-dial ${heat(pct)}" style="--deg:${deg}deg">
-      <div class="score-dial-inner"><span class="score-dial-num">${pct}%</span><span class="score-dial-label">${escapeHtml(label)}</span></div>
-    </div>`;
-  }
-
-  function tagRow(tags, matched) {
+  function tagRow(tags) {
     if (!Array.isArray(tags) || !tags.length) return '';
-    const set = new Set(matched||[]);
-    const hit = tag => window.MatchingEngine.tokenize(tag).some(tk => set.has(tk));
-    const sorted = tags.slice().sort((a,b)=>(hit(b)?1:0)-(hit(a)?1:0));
     // dubbele (na normalisatie vergelijkbare) labels niet twee keer tonen
     const seen = new Set(); const uniq = [];
-    for (const tag of sorted) { const key = tag.toLowerCase(); if (!seen.has(key)) { seen.add(key); uniq.push(tag); } }
+    for (const tag of tags) { const key = tag.toLowerCase(); if (!seen.has(key)) { seen.add(key); uniq.push(tag); } }
     return `<div class="tag-row">${uniq.slice(0,8).map(tag =>
-      `<span class="tag ${hit(tag)?'tag-hit':''}">${escapeHtml(tag)}</span>`).join('')}</div>`;
+      `<span class="tag">${escapeHtml(tag)}</span>`).join('')}</div>`;
   }
 
-  function emptyNote() { return `<p class="empty-note">${escapeHtml(t('noResults'))}</p>`; }
-
-  // Score-info van één item (op id) binnen het huidige matchresultaat.
-  function matchFor(id) {
-    if (!state.result || !id) return { percentage: null, matchedTerms: [] };
-    const all = ['werkervaring', 'projecten', 'vaardigheden', 'referenties']
-      .flatMap(k => state.result.scored[k] || []);
-    return all.find(s => s.item && s.item.id === id) || { percentage: null, matchedTerms: [] };
-  }
-
-  function itemLabel(item) {
-    return item.functie ? `${item.functie}${item.bedrijf?' — '+item.bedrijf:''}`
-      : (item.titel || item.naam || '');
-  }
+  function emptyNote() { return `<p class="empty-note">${escapeHtml(t('emptyList'))}</p>`; }
 
   // Beelden van een item (array of enkel legacy-veld).
   function itemImages(it) {
@@ -972,10 +669,8 @@ Wat bieden wij: een creatieve rol in e-commerce met veel eigen verantwoordelijkh
       ${multi?`<span class="rot-dots">${images.map((_,i)=>`<i class="${i===0?'on':''}"></i>`).join('')}</span>`:''}
     </button>`;
   }
-  function heat(pct) { return pct==null?'none':pct>=60?'high':pct>=30?'mid':pct>0?'low':'none'; }
 
   /* ---- Utils ------------------------------------------------------------- */
-  function debounce(fn, ms){ let h; return (...a)=>{clearTimeout(h);h=setTimeout(()=>fn(...a),ms);}; }
   function escapeHtml(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
   function escapeAttr(s){ return escapeHtml(s); }
 

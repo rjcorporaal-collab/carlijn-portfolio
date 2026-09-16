@@ -4,17 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CARLIJN.CORPORAAL — Junior Creative &amp; Strategic Marketer</title>
-  <meta name="description" content="Portfolio of Carlijn Corporaal — junior creative &amp; strategic marketer. Creative thinker, strategic mind, hands-on doer. Tailors itself to your vacancy." />
+  <meta name="description" content="Portfolio of Carlijn Corporaal — junior creative &amp; strategic marketer. Creative thinker, strategic mind, hands-on doer." />
   <link rel="stylesheet" href="css/style.css" />
-
-  <!-- pdf.js: alleen om een vacature-PDF client-side uit te lezen. Niets wordt geüpload. -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script>
-    if (window.pdfjsLib) {
-      window.pdfjsLib.GlobalWorkerOptions.workerSrc =
-        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    }
-  </script>
 </head>
 <body>
   <!-- Oranje navigatieblok: vaste lijst met alle pagina's, zoals op de Wix-site -->
@@ -43,7 +34,6 @@
           <li><a href="#/letter/ref-ananda" data-route="/letter/ref-ananda" data-nav data-i18n="navLetter2">LETTER OF RECOMMENDATION (2)</a></li>
         </ul>
         <div class="nav-side">
-          <a href="#/match" data-route="/match" data-nav class="nav-cta" data-i18n="navMatch">VACANCY MATCH</a>
           <span class="lang-switch" role="group" aria-label="Language">
             <button class="lang-btn" data-lang="en">EN</button>
             <button class="lang-btn" data-lang="nl">NL</button>
@@ -54,9 +44,6 @@
     </div>
   </header>
 
-  <!-- Status-balk: laat zien of de site op een vacature is afgestemd -->
-  <div class="tailor-bar no-print" id="tailor-bar" hidden></div>
-
   <main id="app" class="app-main"><!-- views worden hier gerenderd --></main>
 
   <footer class="site-footer">
@@ -66,12 +53,11 @@
       <div class="footer-links" id="footer-links"><!-- gevuld door app.js --></div>
       <div class="footer-meta-row">
         <span>© <span id="year"></span> CARLIJN CORPORAAL</span>
-        <span class="footer-meta no-print" data-i18n="footerMeta">Client-side portfolio · your vacancy text never leaves the browser.</span>
+        <span class="footer-meta no-print" data-i18n="footerMeta">Static portfolio · no tracking, no cookies.</span>
       </div>
     </div>
   </footer>
 
-  <script src="js/matching.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
