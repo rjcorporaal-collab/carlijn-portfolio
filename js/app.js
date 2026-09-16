@@ -29,10 +29,18 @@
   const I18N = {
     en: {
       navHome:'Home', navExp:'Experience', navProj:'Projects', navSkills:'Skills',
-      navRefs:'References', navMatch:'Vacancy match',
+      navRefs:'References', navMatch:'VACANCY MATCH', navAbout:'ABOUT ME', navAllWork:'ALL WORK',
+      callMe:'CALL ME', emailMe:'EMAIL ME', connectMe:'CONNECT ME',
+      getInTouch:"Let's. get. in. touch.", buildTogether:'Let’s. build. something. together.',
+      aboutTitle:'About me', lettersTitle:'Letters of recommendation',
+      navLetter1:'LETTER OF RECOMMENDATION (1)', navLetter2:'LETTER OF RECOMMENDATION (2)',
+      roleWord:'ROLE', viewProjectIdx:'View Project', featuredWork:'Selected work', moreWork:'More work',
+      letterKicker:'Letter of Recommendation', readPdf:'Read the original (PDF)', backToRefs:'← All references',
+      teaserKicker:'Vacancy match', teaserPitch:'Paste a job description and this whole portfolio re-sorts itself around it. Nothing leaves your browser.',
+      teaserCta:'Match my vacancy',
       footerMeta:'Client-side portfolio · your vacancy text never leaves the browser.',
       heroCtaPortfolio:'View portfolio', heroCtaMatch:'Match with a vacancy',
-      available:'Available from September 2026', getInTouch:'Get in touch',
+      available:'Available from September 2026',
       statExp:'Roles', statProj:'Projects', statSkills:'Skills & tools', statLang:'Languages',
       focus:'Focus areas', selectedWork:'Selected work', viewProjects:'View all projects',
       tailoredTo:'Tailored to', matchWord:'match', change:'Change', clear:'Clear',
@@ -53,10 +61,18 @@
     },
     nl: {
       navHome:'Home', navExp:'Ervaring', navProj:'Projecten', navSkills:'Vaardigheden',
-      navRefs:'Referenties', navMatch:'Vacature-match',
+      navRefs:'Referenties', navMatch:'VACATURE-MATCH', navAbout:'OVER MIJ', navAllWork:'AL HET WERK',
+      callMe:'BEL ME', emailMe:'MAIL ME', connectMe:'CONNECT MET ME',
+      getInTouch:"Let's. get. in. touch.", buildTogether:'Let’s. build. something. together.',
+      aboutTitle:'Over mij', lettersTitle:'Aanbevelingsbrieven',
+      navLetter1:'AANBEVELINGSBRIEF (1)', navLetter2:'AANBEVELINGSBRIEF (2)',
+      roleWord:'ROL', viewProjectIdx:'Bekijk project', featuredWork:'Uitgelicht werk', moreWork:'Meer werk',
+      letterKicker:'Aanbevelingsbrief', readPdf:'Lees het origineel (PDF)', backToRefs:'← Alle referenties',
+      teaserKicker:'Vacature-match', teaserPitch:'Plak een vacaturetekst en dit hele portfolio herordent zich eromheen. Niets verlaat je browser.',
+      teaserCta:'Match mijn vacature',
       footerMeta:'Client-side portfolio · je vacaturetekst verlaat je browser niet.',
       heroCtaPortfolio:'Bekijk portfolio', heroCtaMatch:'Match met een vacature',
-      available:'Beschikbaar vanaf september 2026', getInTouch:'Neem contact op',
+      available:'Beschikbaar vanaf september 2026',
       statExp:'Functies', statProj:'Projecten', statSkills:'Skills & tools', statLang:'Talen',
       focus:'Focusgebieden', selectedWork:'Uitgelicht werk', viewProjects:'Bekijk alle projecten',
       tailoredTo:'Afgestemd op', matchWord:'match', change:'Wijzig', clear:'Wis',
@@ -109,6 +125,7 @@ Wat bieden wij: een creatieve rol in e-commerce met veel eigen verantwoordelijkh
       console.error(err); return;
     }
     computeResult();
+    renderFooterLinks();
     bindLightbox();
     window.addEventListener('hashchange', router);
     if (!location.hash) location.hash = '#/';
@@ -159,10 +176,29 @@ Wat bieden wij: een creatieve rol in e-commerce met veel eigen verantwoordelijkh
     $$('.lang-btn').forEach(b => b.addEventListener('click', () => setLang(b.dataset.lang)));
   }
 
+  /* ---- Footer: contactknoppen (CALL / EMAIL / CONNECT) ------------------ */
+  function renderFooterLinks() {
+    const box = $('#footer-links');
+    if (!box || !state.pakket) return;
+    box.innerHTML = contactButtons();
+  }
+
+  function contactButtons() {
+    const p = (state.pakket && state.pakket.profiel) || {};
+    const mail = p.email
+      ? 'mailto:' + p.email + (p.emailSubject ? '?subject=' + encodeURIComponent(p.emailSubject) : '')
+      : '';
+    return [
+      p.telefoonLink ? `<a class="wix-btn" href="tel:${escapeAttr(p.telefoonLink)}">${t('callMe')}</a>` : '',
+      mail ? `<a class="wix-btn" href="${escapeAttr(mail)}">${t('emailMe')}</a>` : '',
+      p.linkedin ? `<a class="wix-btn" href="${escapeAttr(p.linkedin)}" target="_blank" rel="noopener">${t('connectMe')}</a>` : ''
+    ].join('');
+  }
+
   function setLang(lang) {
     state.lang = lang; localStorage.setItem(STORE.lang, lang);
     document.documentElement.lang = lang;
-    applyLangLabels(); router();
+    applyLangLabels(); renderFooterLinks(); router();
   }
 
   function applyLangLabels() {
@@ -204,6 +240,7 @@ Wat bieden wij: een creatieve rol in e-commerce met veel eigen verantwoordelijkh
     '/projects':         renderProjects,
     '/skills':           renderSkills,
     '/references':       renderReferences,
+    '/about':            renderAbout,
     '/match':            renderMatch
   };
 
@@ -218,7 +255,10 @@ Wat bieden wij: een creatieve rol in e-commerce met veel eigen verantwoordelijkh
   function router() {
     const route = (location.hash.replace(/^#/, '') || '/').split('?')[0];
     const pid = projectRouteId(route);
-    const view = pid ? () => renderProjectDetail(pid) : (ROUTES[route] || renderHome);
+    const lid = (route.match(/^\/letter\/(.+)$/) || [])[1] || null;
+    const view = pid ? () => renderProjectDetail(pid)
+      : lid ? () => renderLetter(lid)
+      : (ROUTES[route] || renderHome);
     const app = $('#app');
     clearRotators();
     app.classList.remove('fade-in'); void app.offsetWidth; // retrigger animatie
@@ -237,7 +277,7 @@ Wat bieden wij: een creatieve rol in e-commerce met veel eigen verantwoordelijkh
   let _revealObs = null;
   function bindReveal() {
     if (_revealObs) _revealObs.disconnect();
-    const els = $$('.card, .stat, .gallery-item, .block, .home-match, .match-head, .page-head, .chips, .home-focus, .detail-block, .detail-cover, .detail-result, .detail-gallery-wrap');
+    const els = $$('.card, .stat, .gallery-item, .block, .home-match, .match-head, .page-head, .chips, .home-focus, .detail-block, .detail-cover, .detail-result, .detail-gallery-wrap, .work-band, .about-body, .letter-body, .contact-band, .match-teaser');
     if (!('IntersectionObserver' in window)) { els.forEach(e => e.classList.add('in')); return; }
     _revealObs = new IntersectionObserver(entries => {
       entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); _revealObs.unobserve(e.target); } });
@@ -299,78 +339,143 @@ Wat bieden wij: een creatieve rol in e-commerce met veel eigen verantwoordelijkh
    * ==================================================================== */
   function renderHome() {
     const p = state.pakket.profiel || {};
-    const counts = {
-      exp: (state.pakket.werkervaring||[]).length,
-      proj: (state.pakket.projecten||[]).length,
-      skills: (state.pakket.vaardigheden||[]).length,
-      lang: 3
-    };
-    const topSkills = getSection('vaardigheden').slice(0, 6)
-      .map(s => `<a class="chip ${heat(s.percentage)}" href="#/skills">${escapeHtml(s.item.naam)}</a>`).join('');
+    const naam = p.naamDisplay || (p.naam || '').toUpperCase();
+    const featured = getSection('projecten').filter(s => s.item && s.item.uitgelicht);
+    const rest = getSection('projecten').filter(s => !(s.item && s.item.uitgelicht));
 
-    let matchSummary = '';
-    if (state.result) {
-      const r = state.result;
-      const top = r.scored.werkervaring[0] || r.scored.projecten[0];
-      matchSummary = `<div class="home-match card-elevated">
-        ${scoreDial(r.overall, t('overall'))}
-        <div class="home-match-text">
-          <p class="home-match-line">${t('tailoredTo')} <strong>${escapeHtml(r.jobTitle||'—')}</strong></p>
-          ${top ? `<p class="home-match-sub">${t('relevantExperience')}: <strong>${escapeHtml(itemLabel(top.item))}</strong></p>` : ''}
-          <a class="btn btn-primary" href="#/match">${t('seeMatch')} →</a>
-        </div>
-      </div>`;
-    }
-
-    return `<section class="hero">
-      <div class="wrap hero-inner">
-        <div class="hero-toprow">
-          <span class="hero-label">Portfolio</span>
-          <span class="hero-label">${escapeHtml((p.titel||'').split(/[·|]/)[0].trim())}</span>
-        </div>
-        <h1 class="hero-name">${escapeHtml(p.naam||'')}</h1>
-        <div class="hero-photo-wrap">
-          <img class="hero-photo" src="assets/carlijn.jpg" alt="Carlijn Corporaal" loading="eager" />
-          <span class="hero-avail">${t('available')}</span>
-        </div>
-        <p class="hero-pitch">${escapeHtml(p.pitch||'')}</p>
-        <div class="hero-cta">
-          <a class="btn btn-primary" href="#/match">${t('heroCtaMatch')}</a>
-          <a class="btn btn-ghost" href="#/projects">${t('heroCtaPortfolio')}</a>
-        </div>
-        <div class="hero-contact">
-          ${p.email ? `<a href="mailto:${escapeAttr(p.email)}">${escapeHtml(p.email)}</a>` : ''}
-          ${p.linkedin ? `<span class="sep">/</span><a href="${escapeAttr(p.linkedin)}" target="_blank" rel="noopener">LinkedIn</a>` : ''}
-          ${p.locatie ? `<span class="sep">/</span><span>${escapeHtml(p.locatie)}</span>` : ''}
-        </div>
+    return `<section class="hero-wix">
+      <h1 class="hero-huge">${escapeHtml(naam)}</h1>
+      <div class="hero-row">
+        <p class="hero-role">${escapeHtml(p.titel || '')}</p>
+        <p class="hero-tagline">${escapeHtml(p.tagline || '')}</p>
       </div>
     </section>
 
-    ${marqueeStrip()}
+    ${matchTeaser()}
 
-    <section class="wrap home-body">
-      ${matchSummary}
-      <div class="stats-row">
-        ${stat(counts.exp, t('statExp'), '#/experience')}
-        ${stat(counts.proj, t('statProj'), '#/projects')}
-        ${stat(counts.skills, t('statSkills'), '#/skills')}
-        ${stat('45k+', 'Instagram')}
+    <div class="work-index">
+      ${featured.map((s, i) => workBand(s, i)).join('')}
+    </div>
+
+    ${rest.length ? `<section class="more-work">
+      <h2>${t('moreWork')}</h2>
+      <div class="more-work-list">
+        ${rest.map(s => `<a class="more-work-item" href="${escapeAttr(s.item.detailpagina || '#/projects')}">
+          <span class="mw-title">${escapeHtml(s.item.titel || '')}</span>
+          <span class="mw-meta">${escapeHtml([s.item.rol, s.item.periode].filter(Boolean).join(' · '))}</span>
+          <span class="mw-arrow" aria-hidden="true">→</span></a>`).join('')}
       </div>
-      <div class="home-focus">
-        <h3>${t('focus')}</h3>
-        <div class="chips">${topSkills}</div>
+    </section>` : ''}
+
+    ${contactBand()}`;
+  }
+
+  /* ---- Eén projectband op de index (kleurblok, zoals op de Wix-site) ---- */
+  function workBand(s, i) {
+    const it = s.item || {};
+    const nr = typeof i === 'number' ? '(' + (i + 1) + ')' : (it.nummer || '');
+    const href = escapeAttr(it.detailpagina || '#/projects');
+    const imgs = itemImages(it);
+    const cover = imgs.length
+      ? `<img class="panel-img" src="${escapeAttr(imgs[0])}" alt="${escapeAttr(it.titel || '')}" loading="lazy" />`
+      : '';
+    const score = s.percentage == null ? ''
+      : `<span class="band-score ${heat(s.percentage)}">${s.percentage}% ${t('matchWord')}</span>`;
+    return `<section class="work-band band-${escapeAttr(it.kleur || 'yellow')}">
+      <div class="band-row">
+        <span class="band-num">${escapeHtml(nr)}</span>
+        <a class="band-title" href="${href}">${escapeHtml(it.titel || '')}</a>
+        <a class="band-link" href="${href}">${t('viewProjectIdx')}</a>
+        <span class="band-emoji" aria-hidden="true">(${escapeHtml(it.emoji || '')})</span>
+        ${score}
       </div>
-      ${galleryBlock()}
+      <a class="band-panel panel-${escapeAttr(it.paneel || 'magenta')}" href="${href}"
+         aria-label="${escapeAttr(it.titel || '')}">
+        <span class="panel-frame">
+          ${cover}
+          <span class="panel-title title-${escapeAttr(it.titelKleur || 'blue')}">${escapeHtml((it.titel || '').replace(/\s*\(.*\)$/, ''))}</span>
+        </span>
+        <span class="band-meta">
+          ${it.rol ? `<span>${t('roleWord')}: ${escapeHtml(it.rol)}</span>` : ''}
+          ${it.type ? `<span>${escapeHtml(it.typeLabel || 'TYPE')}: ${escapeHtml(it.type)}</span>` : ''}
+        </span>
+      </a>
     </section>`;
   }
 
-  // Doorlopende marquee-strip (puur decoratief, CSS-animatie).
-  function marqueeStrip() {
-    const words = state.lang === 'nl'
-      ? ['Marketing','Branding','Social media','Content','Strategie','Campagnes','Storytelling','Influencer','Creatie','Communicatie']
-      : ['Marketing','Branding','Social media','Content','Strategy','Campaigns','Storytelling','Influencer','Creative','Communication'];
-    const seq = words.map(w => `<span>${escapeHtml(w)}</span><span class="mq-dot">✳</span>`).join('');
-    return `<div class="marquee no-print" aria-hidden="true"><div class="marquee-track">${seq}${seq}</div></div>`;
+  /* ---- Zwarte band met de vacature-match (het eigen extraatje) ---------- */
+  function matchTeaser() {
+    const r = state.result;
+    if (r) {
+      const top = r.scored.werkervaring[0] || r.scored.projecten[0];
+      return `<section class="match-teaser tailored">
+        <span class="teaser-kicker">${t('teaserKicker')}</span>
+        <p class="teaser-line">${t('tailoredTo')}: <strong>${escapeHtml(r.jobTitle || '—')}</strong>
+          <em>${r.overall}% ${t('matchWord')}</em></p>
+        ${top ? `<p class="teaser-sub">${t('relevantExperience')}: <strong>${escapeHtml(itemLabel(top.item))}</strong></p>` : ''}
+        <a class="wix-btn" href="#/match">${t('seeMatch')}</a>
+      </section>`;
+    }
+    return `<section class="match-teaser">
+      <span class="teaser-kicker">${t('teaserKicker')}</span>
+      <p class="teaser-line">${escapeHtml(t('teaserPitch'))}</p>
+      <a class="wix-btn" href="#/match">${t('teaserCta')}</a>
+    </section>`;
+  }
+
+  /* ---- Contactband: Let's. build. something. together. ------------------ */
+  function contactBand() {
+    return `<section class="contact-band">
+      <p class="contact-head">${t('buildTogether')}</p>
+      <p class="contact-sub">${t('getInTouch')}</p>
+      <div class="contact-btns">${contactButtons()}</div>
+    </section>`;
+  }
+
+  /* ---- Over mij --------------------------------------------------------- */
+  function renderAbout() {
+    const a = state.pakket.about || {};
+    const paras = (a.alinea || []).map(x => `<p>${escapeHtml(x)}</p>`).join('');
+    return `<article class="about-page">
+      <section class="about-hero">
+        <h1 class="about-title">${escapeHtml(a.titel || '')}</h1>
+        <p class="about-lead">${escapeHtml(a.lead || '')}</p>
+      </section>
+      <section class="about-body band-green">
+        <div class="about-grid">
+          <div class="about-text">
+            <h2 class="about-kop">${escapeHtml(a.kop || '')}</h2>
+            ${paras}
+          </div>
+          ${a.foto ? `<img class="about-photo" src="${escapeAttr(a.foto)}" alt="Carlijn Corporaal" loading="lazy" />` : ''}
+        </div>
+      </section>
+      ${contactBand()}
+    </article>`;
+  }
+
+  /* ---- Aanbevelingsbrief (eigen pagina per brief) ----------------------- */
+  function renderLetter(id) {
+    const list = state.pakket.referenties || [];
+    const it = list.find(r => r.id === id);
+    if (!it) { location.hash = '#/references'; return ''; }
+    const idx = list.filter(r => r.brieftekst).indexOf(it);
+    const kleur = idx === 1 ? 'skyblue' : 'green';
+    const paras = (it.brieftekst || []).map(x => `<p>${escapeHtml(x)}</p>`).join('');
+    return `<article class="letter-page">
+      <a class="back-link" href="#/references">${t('backToRefs')}</a>
+      <header class="letter-head">
+        <span class="letter-kicker">${t('letterKicker')} ${escapeHtml(it.nummer || '')}</span>
+        <h1>${escapeHtml(it.naam || '')}</h1>
+        <p class="letter-role">${escapeHtml([it.functie, it.bedrijf].filter(Boolean).join(' · '))}</p>
+      </header>
+      <section class="letter-body band-${kleur}">
+        ${paras || `<p>${escapeHtml(t('noResults'))}</p>`}
+        ${Array.isArray(it.ondertekening) ? `<p class="letter-sign">${it.ondertekening.map(escapeHtml).join('<br>')}</p>` : ''}
+      </section>
+      ${it.brief ? `<div class="letter-actions"><a class="wix-btn" href="${escapeAttr(it.brief)}" target="_blank" rel="noopener">${t('readPdf')}</a></div>` : ''}
+      ${contactBand()}
+    </article>`;
   }
 
   function galleryBlock() {
@@ -379,7 +484,6 @@ Wat bieden wij: een creatieve rol in e-commerce met veel eigen verantwoordelijkh
     return `<div class="home-gallery">
       <div class="gallery-head">
         <h3>${t('selectedWork')}</h3>
-        <a href="#/projects" class="gallery-link">${t('viewProjects')} →</a>
       </div>
       <div class="gallery-grid">
         ${g.map(topic => `<div class="gallery-item">
@@ -417,32 +521,10 @@ Wat bieden wij: een creatieve rol in e-commerce met veel eigen verantwoordelijkh
 
   function renderProjects() {
     const items = filterRel(getSection('projecten'));
-    return pageShell(t('projTitle'), relControls(), `
-      <div class="cards-grid">
-        ${items.map(projCard).join('') || emptyNote()}
-      </div>`);
-  }
-
-  function projCard(s) {
-    const it = s.item;
-    const imgs = itemImages(it);
-    const kicker = it.detail && it.detail.kicker ? it.detail.kicker : '';
-    const cover = imgs.length
-      ? renderRotator(imgs, 'card-cover', it.titel||'')
-      : `<a class="card-cover card-cover-poster" href="${escapeAttr(it.detailpagina||'#/projects')}">
-          <span class="poster-kicker">${escapeHtml(kicker || 'Project')}</span>
-          <span class="poster-title">${escapeHtml(it.titel||'')}</span></a>`;
-    return `<article class="card project-card has-cover">
-      ${cover}
-      ${badgeAndBar(s)}
-      ${kicker ? `<span class="card-kicker">${escapeHtml(kicker)}</span>` : ''}
-      <h3>${escapeHtml(it.titel||'')}</h3>
-      ${it.impressie ? `<p class="card-impressie">${escapeHtml(it.impressie)}</p>`
-        : (it.beschrijving ? `<p class="card-body">${escapeHtml(it.beschrijving)}</p>` : '')}
-      ${it.resultaat ? `<p class="card-result">✔ ${escapeHtml(it.resultaat)}</p>` : ''}
-      ${tagRow((it.tags||[]).concat(it.vaardigheden||[]), s.matchedTerms)}
-      ${it.detailpagina ? `<a class="card-project-link" href="${escapeAttr(it.detailpagina)}">${t('viewProject')} →</a>` : ''}
-    </article>`;
+    return pageShell(t('projTitle'), relControls(),
+      `<div class="work-index">${items.map((s, i) => workBand(s, i)).join('')}</div>
+       ${items.length ? '' : emptyNote()}
+       ${galleryBlock()}`);
   }
 
   function renderSkills() {
@@ -479,14 +561,16 @@ Wat bieden wij: een creatieve rol in e-commerce met veel eigen verantwoordelijkh
 
   function refCard(s) {
     const it = s.item;
-    const citaat = (it.citaat||'').trim();
-    return `<article class="card ref-card${it.brief ? '' : ' ref-card--full'}">
+    const citaat = (it.citaat || '').trim();
+    return `<article class="card ref-card${it.brieftekst ? '' : ' ref-card--full'}">
       ${badgeAndBar(s)}
+      ${it.nummer ? `<span class="ref-num">${escapeHtml(it.nummer)}</span>` : ''}
       ${citaat ? `<blockquote>“${escapeHtml(citaat)}”</blockquote>` : ''}
-      <p class="ref-name"><strong>${escapeHtml(it.naam||'')}</strong></p>
+      <p class="ref-name"><strong>${escapeHtml(it.naam || '')}</strong></p>
       <p class="card-meta">${escapeHtml([it.functie, it.bedrijf].filter(Boolean).join(' · '))}</p>
       ${it.relatie ? `<p class="ref-relation">${escapeHtml(it.relatie)}</p>` : ''}
-      ${it.brief ? `<a class="ref-letter" href="${escapeAttr(it.brief)}" target="_blank" rel="noopener">${t('readLetter')} ↗</a>` : ''}
+      ${it.brieftekst ? `<a class="ref-letter" href="#/letter/${escapeAttr(it.id)}">${t('readLetter')} →</a>` : ''}
+      ${it.brief && !it.brieftekst ? `<a class="ref-letter" href="${escapeAttr(it.brief)}" target="_blank" rel="noopener">${t('readPdf')} ↗</a>` : ''}
     </article>`;
   }
 
@@ -514,7 +598,8 @@ Wat bieden wij: een creatieve rol in e-commerce met veel eigen verantwoordelijkh
     const lead = it.impressie || it.beschrijving || '';
     const tags = (it.tags || []).slice(0, 10).map(x => `<span class="tag">${escapeHtml(x)}</span>`).join('');
     const blocks = (Array.isArray(d.blokken) && d.blokken.length ? d.blokken : synthBlocks(it))
-      .map(b => `<div class="detail-block"><h2>${escapeHtml(b.h)}</h2>${
+      .map(b => `<div class="detail-block${b.h ? '' : ' detail-block--plain'}">${
+        b.h ? `<h2>${escapeHtml(b.h)}</h2>` : ''}${
         Array.isArray(b.list)
           ? `<ul class="detail-list">${b.list.map(li => `<li>${escapeHtml(li)}</li>`).join('')}</ul>`
           : `<p>${escapeHtml(b.p || '')}</p>`}</div>`).join('');
@@ -554,20 +639,29 @@ Wat bieden wij: een creatieve rol in e-commerce met veel eigen verantwoordelijkh
       </section>`;
     }
 
-    return `<div class="wrap project-detail">
-      <a class="detail-back" href="#/projects">${t('backToProjects')}</a>
-      <header class="detail-head">
-        <span class="detail-kicker">${kicker}</span>
-        <h1>${titleHtml}</h1>
-        <p class="detail-lead">${escapeHtml(lead)}</p>
-        <div class="tag-row">${tags}</div>
-      </header>
-      ${cover}
-      <div class="detail-columns">
+    const meta = [
+      it.rol ? `<span>${t('roleWord')}: ${escapeHtml(it.rol)}</span>` : '',
+      it.type ? `<span>${escapeHtml(it.typeLabel || 'TYPE')}: ${escapeHtml(it.type)}</span>` : '',
+      it.periode ? `<span>${escapeHtml(it.periode)}</span>` : ''
+    ].join('');
+
+    return `<div class="project-detail band-${escapeAttr(it.kleur || 'yellow')}">
+      <div class="detail-top">
+        <a class="back-link" href="#/projects">${t('backToProjects')}</a>
+        <header class="detail-head">
+          <h1>${titleHtml}</h1>
+          <div class="detail-meta">${meta || `<span>${kicker}</span>`}</div>
+        </header>
+      </div>
+      <div class="detail-sheet">
+        ${badgeAndBar(matchFor(it.id))}
         <section class="detail-body">${blocks}</section>
         ${result}
+        ${cover}
+        ${gallery}
+        <div class="tag-row">${tags}</div>
       </div>
-      ${gallery}
+      ${contactBand()}
     </div>`;
   }
 
@@ -847,13 +941,15 @@ Wat bieden wij: een creatieve rol in e-commerce met veel eigen verantwoordelijkh
       `<span class="tag ${hit(tag)?'tag-hit':''}">${escapeHtml(tag)}</span>`).join('')}</div>`;
   }
 
-  function stat(num, label, href) {
-    const inner = `<span class="stat-num">${escapeHtml(String(num))}</span><span class="stat-label">${escapeHtml(label)}</span>`;
-    return href
-      ? `<a class="stat stat-link" href="${href}">${inner}<span class="stat-arrow" aria-hidden="true">→</span></a>`
-      : `<div class="stat">${inner}</div>`;
-  }
   function emptyNote() { return `<p class="empty-note">${escapeHtml(t('noResults'))}</p>`; }
+
+  // Score-info van één item (op id) binnen het huidige matchresultaat.
+  function matchFor(id) {
+    if (!state.result || !id) return { percentage: null, matchedTerms: [] };
+    const all = ['werkervaring', 'projecten', 'vaardigheden', 'referenties']
+      .flatMap(k => state.result.scored[k] || []);
+    return all.find(s => s.item && s.item.id === id) || { percentage: null, matchedTerms: [] };
+  }
 
   function itemLabel(item) {
     return item.functie ? `${item.functie}${item.bedrijf?' — '+item.bedrijf:''}`
