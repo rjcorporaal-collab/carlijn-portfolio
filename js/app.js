@@ -17,8 +17,7 @@
   const state = {
     pakket: null,
     lang: localStorage.getItem(STORE.lang) || 'en',
-    _rotTimers: [],
-    _bmTimer: null
+    _rotTimers: []
   };
 
   /* ---- Interface-teksten (labels; content komt uit pakket.json) ---------- */
@@ -35,8 +34,7 @@
       roleWord:'ROLE', viewProjectIdx:'View Project',
       letterKicker:'Letter of Recommendation', readLetter:'Read recommendation letter',
       readPdf:'Read the original (PDF)', backToRefs:'← All references',
-      backToProjects:'← Back to projects', projectVisuals:'Visuals from the project',
-      noVisuals:'Add page images to assets/broadcast/ to fill this gallery.', result:'Result',
+      backToProjects:'← Back to projects', result:'Result',
       relation:'Relation', emptyList:'Nothing here yet.',
       footerMeta:'Static portfolio · no tracking, no cookies.',
       loadError:'Could not load pakket.json. Run the site via a local web server (see README).'
@@ -53,8 +51,7 @@
       roleWord:'ROL', viewProjectIdx:'Bekijk project',
       letterKicker:'Aanbevelingsbrief', readLetter:'Lees de aanbevelingsbrief',
       readPdf:'Lees het origineel (PDF)', backToRefs:'← Alle referenties',
-      backToProjects:'← Terug naar projecten', projectVisuals:'Visuals uit het project',
-      noVisuals:'Zet pagina-afbeeldingen in assets/broadcast/ om deze galerij te vullen.', result:'Resultaat',
+      backToProjects:'← Terug naar projecten', result:'Resultaat',
       relation:'Relatie', emptyList:'Hier staat nog niets.',
       footerMeta:'Statisch portfolio · geen tracking, geen cookies.',
       loadError:'Kon pakket.json niet laden. Draai de site via een lokale webserver (zie README).'
@@ -199,30 +196,65 @@
     app.classList.add('fade-in');
     // Actieve nav
     $$('[data-route]').forEach(a => a.classList.toggle('active', a.dataset.route === route));
-    bindViewEvents(route);
     bindRotators();
     window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
     bindReveal();
   }
 
-  /* ---- Scroll-reveal (gestaggerd in beeld faden) ------------------------ */
+  /* ---- Scroll-reveal ----------------------------------------------------
+   * Drie effecten, overgenomen van de Wix-site (daar met de Web Animations
+   * API gedaan, hier met CSS-transities):
+   *   rev-fold  koppen klappen naar je toe open  (rotateX -90 -> 0, 1200 ms)
+   *   rev-up    tekst schuift 60 px omhoog + fade            (1200 ms)
+   *   rev-wipe  beelden komen van boven vrij + schalen terug  (960 ms)
+   * -------------------------------------------------------------------- */
+  const REVEAL = [
+    ['rev-fold', '.hero-huge, .about-title, .page-head h1, .detail-head h1, .letter-head h1, .more-work h2, .gallery-head h3'],
+    ['rev-up',   '.hero-role, .hero-tagline, .about-lead, .about-kop, .about-text p, .detail-meta, .detail-block, .detail-result, .letter-kicker, .letter-role, .letter-body p, .band-row, .band-meta, .more-work-item, .card-meta, .card-impressie, .card-list, .ref-card blockquote, .tag-row'],
+    ['rev-wipe', '.panel-graphic, .panel-frame, .case-shot, .about-photo, .gallery-item, .card-cover']
+  ];
+
   let _revealObs = null;
   function bindReveal() {
     if (_revealObs) _revealObs.disconnect();
-    const els = $$('.card, .gallery-item, .page-head, .detail-block, .detail-cover, .detail-result, .detail-gallery-wrap, .work-band, .about-body, .letter-body');
-    if (!('IntersectionObserver' in window)) { els.forEach(e => e.classList.add('in')); return; }
+    const els = [];
+    REVEAL.forEach(([klas, sel]) => $$(sel).forEach(el => {
+      el.classList.add(klas);
+      // Al onthuld? Laten staan. Anders (opnieuw) laten observeren, zodat een
+      // tweede aanroep van bindReveal de rest niet verweesd achterlaat.
+      if (!el.classList.contains('in')) els.push(el);
+    }));
+    const meteen = () => els.forEach(e => e.classList.add('in'));
+    if (!('IntersectionObserver' in window) ||
+        matchMedia('(prefers-reduced-motion: reduce)').matches) { meteen(); return; }
     _revealObs = new IntersectionObserver(entries => {
-      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); _revealObs.unobserve(e.target); } });
-    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+      entries.forEach(e => {
+        if (!e.isIntersecting) return;
+        e.target.classList.add('in');
+        _revealObs.unobserve(e.target);
+      });
+    }, { threshold: 0.06, rootMargin: '0px 0px -8% 0px' });
     els.forEach((el, i) => {
-      el.classList.add('reveal');
-      el.style.transitionDelay = ((i % 6) * 55) + 'ms';
+      // lichte stagger per groepje, zoals Wix doet
+      el.style.animationDelay = ((i % 5) * 70) + 'ms';
       _revealObs.observe(el);
     });
+
+    // Vangnet. Een browser levert geen observer-callbacks aan een verborgen
+    // tab; zonder dit blijft de pagina leeg voor wie hem op de achtergrond
+    // opent. Deze veeg onthult alleen wat écht in beeld staat, dus de
+    // scroll-animatie blijft intact.
+    const veeg = () => els.forEach(el => {
+      if (el.classList.contains('in')) return;
+      const r = el.getBoundingClientRect();
+      if (r.top < innerHeight * 0.94 && r.bottom > 0) el.classList.add('in');
+    });
+    setTimeout(veeg, 1200);
+    document.addEventListener('visibilitychange', () => setTimeout(veeg, 150), { once: true });
   }
 
   /* ---- Roterende afbeeldingen ------------------------------------------- */
-  function clearRotators() { (state._rotTimers||[]).forEach(clearInterval); state._rotTimers = []; clearInterval(state._bmTimer); }
+  function clearRotators() { (state._rotTimers||[]).forEach(clearInterval); state._rotTimers = []; }
   function bindRotators() {
     $$('.rotator.multi').forEach((rot, idx) => {
       const imgs = $$('.rot-img', rot), dots = $$('.rot-dots i', rot);
@@ -274,14 +306,28 @@
     </section>` : ''}`;
   }
 
-  /* ---- Eén projectband op de index (kleurblok) -------------------------- */
+  /* ---- Eén projectband op de index (kleurblok) --------------------------
+   * Is er een paneelBeeld (de vormgegeven plaat van de Wix-site, met de
+   * projectnaam er al in), dan vult die het hele paneel. Zo niet, dan valt
+   * hij terug op een gekleurd vlak met het eerste projectbeeld en de naam.
+   * -------------------------------------------------------------------- */
   function workBand(it, i) {
     const href = escapeAttr(it.detailpagina || '#/projects');
     const nr = typeof i === 'number' ? '(' + (i + 1) + ')' : (it.nummer || '');
     const imgs = itemImages(it);
-    const cover = imgs.length
-      ? `<img class="panel-img" src="${escapeAttr(imgs[0])}" alt="${escapeAttr(it.titel || '')}" loading="lazy" />`
-      : '';
+    const meta = `<span class="band-meta">
+      ${it.rol ? `<span>${t('roleWord')}: ${escapeHtml(it.rol)}</span>` : ''}
+      ${it.type ? `<span>${escapeHtml(it.typeLabel || 'TYPE')}: ${escapeHtml(it.type)}</span>` : ''}
+    </span>`;
+
+    const paneel = it.paneelBeeld
+      ? `<img class="panel-graphic" src="${escapeAttr(it.paneelBeeld)}"
+              alt="${escapeAttr(it.titel || '')}" loading="lazy" />`
+      : `<span class="panel-frame panel-${escapeAttr(it.paneel || 'magenta')}">
+          ${imgs.length ? `<img class="panel-img" src="${escapeAttr(imgs[0])}" alt="${escapeAttr(it.titel || '')}" loading="lazy" />` : ''}
+          <span class="panel-title title-${escapeAttr(it.titelKleur || 'blue')}">${escapeHtml((it.titel || '').replace(/\s*\(.*\)$/, ''))}</span>
+        </span>`;
+
     return `<section class="work-band band-${escapeAttr(it.kleur || 'yellow')}">
       <div class="band-row">
         <span class="band-num">${escapeHtml(nr)}</span>
@@ -289,16 +335,9 @@
         <a class="band-link" href="${href}">${t('viewProjectIdx')}</a>
         <span class="band-emoji" aria-hidden="true">(${escapeHtml(it.emoji || '')})</span>
       </div>
-      <a class="band-panel panel-${escapeAttr(it.paneel || 'magenta')}" href="${href}"
-         aria-label="${escapeAttr(it.titel || '')}">
-        <span class="panel-frame">
-          ${cover}
-          <span class="panel-title title-${escapeAttr(it.titelKleur || 'blue')}">${escapeHtml((it.titel || '').replace(/\s*\(.*\)$/, ''))}</span>
-        </span>
-        <span class="band-meta">
-          ${it.rol ? `<span>${t('roleWord')}: ${escapeHtml(it.rol)}</span>` : ''}
-          ${it.type ? `<span>${escapeHtml(it.typeLabel || 'TYPE')}: ${escapeHtml(it.type)}</span>` : ''}
-        </span>
+      <a class="band-panel" href="${href}" aria-label="${escapeAttr(it.titel || '')}">
+        ${paneel}
+        ${meta}
       </a>
     </section>`;
   }
@@ -468,40 +507,19 @@
           ? `<ul class="detail-list">${b.list.map(li => `<li>${escapeHtml(li)}</li>`).join('')}</ul>`
           : `<p>${escapeHtml(b.p || '')}</p>`}</div>`).join('');
     const imgs = itemImages(it);
-    const cover = imgs.length
-      ? `<div class="detail-cover">${renderRotator(imgs, 'detail-cover-rot', it.titel || '')}</div>` : '';
     const result = (it.resultaat || '').trim()
       ? `<aside class="detail-result"><span class="detail-result-label">${t('result')}</span><p>${escapeHtml(it.resultaat)}</p></aside>` : '';
 
-    // Galerij: een map om af te tasten (Broadcast), anders de eigen projectbeelden.
-    let gallery = '';
-    if (d.galerijMap) {
-      gallery = `<section class="detail-gallery-wrap" data-gallery-map="${escapeAttr(d.galerijMap)}">
-        <h2>${t('projectVisuals')}</h2>
-        <div id="bm-gallery" class="bm-carousel" hidden>
-          <div class="bm-viewport"><div class="bm-track" id="bm-track"></div></div>
-          <button type="button" class="bm-arrow bm-prev" aria-label="Vorige">‹</button>
-          <button type="button" class="bm-arrow bm-next" aria-label="Volgende">›</button>
-          <div class="bm-dots" id="bm-dots"></div>
-        </div>
-        <p id="bm-gallery-empty" class="empty-note" hidden>${escapeHtml(t('noVisuals'))}</p>
-      </section>`;
-    } else if (imgs.length > 1) {
-      gallery = `<section class="detail-gallery-wrap">
-        <h2>${t('projectVisuals')}</h2>
-        <div id="bm-gallery" class="bm-carousel">
-          <div class="bm-viewport"><div class="bm-track" id="bm-track">
-            ${imgs.map((src, i) => `<button type="button" class="bm-slide" data-src="${escapeAttr(src)}" data-caption="${escapeAttr(it.titel || '')} — ${String(i + 1).padStart(2, '0')}">
-              <img src="${escapeAttr(src)}" loading="${i < 2 ? 'eager' : 'lazy'}" alt="${escapeAttr(it.titel || '')} ${i + 1}"></button>`).join('')}
-          </div></div>
-          <button type="button" class="bm-arrow bm-prev" aria-label="Vorige">‹</button>
-          <button type="button" class="bm-arrow bm-next" aria-label="Volgende">›</button>
-          <div class="bm-dots" id="bm-dots">
-            ${imgs.map((_, i) => `<button type="button" class="bm-dot${i === 0 ? ' on' : ''}" data-i="${i}" aria-label="Ga naar beeld ${i + 1}"></button>`).join('')}
-          </div>
-        </div>
-      </section>`;
-    }
+    // De beelden onder elkaar over de volle breedte, zoals op de Wix-site.
+    // Klik op een beeld opent de lightbox (zie bindLightbox).
+    const stapel = imgs.length ? `<section class="case-stack">
+      ${imgs.map((src, i) => `<button type="button" class="case-shot"
+          data-lightbox="${escapeAttr(src)}"
+          data-caption="${escapeAttr(it.titel || '')} — ${String(i + 1).padStart(2, '0')}">
+        <img src="${escapeAttr(src)}" loading="${i < 2 ? 'eager' : 'lazy'}"
+             alt="${escapeAttr(it.titel || '')} ${i + 1}" />
+      </button>`).join('')}
+    </section>` : '';
 
     const meta = [
       it.rol ? `<span>${t('roleWord')}: ${escapeHtml(it.rol)}</span>` : '',
@@ -520,102 +538,10 @@
       <div class="detail-sheet">
         <section class="detail-body">${blocks}</section>
         ${result}
-        ${cover}
-        ${gallery}
+        ${stapel}
         <div class="tag-row">${tags}</div>
       </div>
     </div>`;
-  }
-
-  // Vult de aftast-galerij (Broadcast) met wat er in de opgegeven map staat
-  // (bv. assets/broadcast/broadcast-01.jpg … -12.jpg). Ontbrekende bestanden worden
-  // stil overgeslagen, zodat je zoveel of weinig beelden kunt toevoegen als je wilt.
-  function bindProbeGallery(prefix) {
-    const root = $('#bm-gallery'); if (!root) return;
-    const track = $('#bm-track'), dotsWrap = $('#bm-dots'), empty = $('#bm-gallery-empty');
-    const MAX = 12;
-    const probes = [];
-    for (let i = 1; i <= MAX; i++) {
-      const n = String(i).padStart(2, '0');
-      const src = `${prefix}${n}.jpg`;
-      probes.push(new Promise(res => { const im = new Image(); im.onload = () => res(src); im.onerror = () => res(null); im.src = src; }));
-    }
-    Promise.all(probes).then(list => {
-      const found = list.filter(Boolean);
-      if (!found.length) { root.hidden = true; if (empty) empty.hidden = false; return; }
-      root.hidden = false;
-      track.innerHTML = found.map((src, i) =>
-        `<button type="button" class="bm-slide" data-src="${src}" data-caption="Broadcast Magazine — ${String(i + 1).padStart(2, '0')}">
-          <img src="${src}" loading="${i < 2 ? 'eager' : 'lazy'}" alt="Broadcast Magazine visual ${i + 1}"></button>`).join('');
-      dotsWrap.innerHTML = found.map((_, i) => `<button type="button" class="bm-dot${i === 0 ? ' on' : ''}" data-i="${i}" aria-label="Ga naar beeld ${i + 1}"></button>`).join('');
-      initCarousel(found.length);
-    });
-  }
-
-  // Detailgalerij initialiseren: aftasten (map) of direct (vooraf gevulde track).
-  function bindProjectGallery() {
-    const wrap = $('.detail-gallery-wrap');
-    const root = $('#bm-gallery');
-    if (!wrap || !root) return;
-    const map = wrap.getAttribute('data-gallery-map');
-    if (map) { bindProbeGallery(map); return; }
-    const count = $$('.bm-slide', root).length;
-    if (count) initCarousel(count);
-  }
-
-  // Automatische carrousel met handmatige bediening (pijlen, dots, toetsenbord, swipe).
-  function initCarousel(count) {
-    const root = $('#bm-gallery'), track = $('#bm-track');
-    const dots = $$('.bm-dot', root), slides = $$('.bm-slide', root);
-    let idx = 0, suppressClick = false;
-
-    function go(i) {
-      idx = (i % count + count) % count;
-      track.style.transform = `translateX(${-idx * 100}%)`;
-      dots.forEach((d, k) => d.classList.toggle('on', k === idx));
-    }
-    const next = () => go(idx + 1), prev = () => go(idx - 1);
-    function restart() { clearInterval(state._bmTimer); state._bmTimer = setInterval(next, 4500); }
-
-    $('.bm-next', root).addEventListener('click', () => { next(); restart(); });
-    $('.bm-prev', root).addEventListener('click', () => { prev(); restart(); });
-    dots.forEach(d => d.addEventListener('click', () => { go(+d.dataset.i); restart(); }));
-
-    // Klik op een beeld → lightbox (maar niet direct na een swipe)
-    slides.forEach(sl => sl.addEventListener('click', () => {
-      if (suppressClick) return;
-      openLightbox(sl.dataset.src, sl.dataset.caption || '');
-    }));
-
-    // Pauzeer bij hover, hervat erna
-    root.addEventListener('mouseenter', () => clearInterval(state._bmTimer));
-    root.addEventListener('mouseleave', restart);
-
-    // Toetsenbord
-    root.setAttribute('tabindex', '0');
-    root.addEventListener('keydown', e => {
-      if (e.key === 'ArrowRight') { next(); restart(); }
-      else if (e.key === 'ArrowLeft') { prev(); restart(); }
-    });
-
-    // Touch-swipe
-    let x0 = null;
-    track.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
-    track.addEventListener('touchend', e => {
-      if (x0 == null) return;
-      const dx = e.changedTouches[0].clientX - x0;
-      if (Math.abs(dx) > 40) { suppressClick = true; setTimeout(() => suppressClick = false, 350); dx < 0 ? next() : prev(); restart(); }
-      x0 = null;
-    }, { passive: true });
-
-    go(0); restart();
-  }
-
-  /* ======================================================================
-   * View-events
-   * ==================================================================== */
-  function bindViewEvents(route) {
-    if (route.indexOf('/project/') === 0) { bindProjectGallery(); }
   }
 
   /* ======================================================================

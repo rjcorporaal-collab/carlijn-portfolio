@@ -49,9 +49,37 @@ button{ font:inherit; }
 .fade-in{ animation:fade .25s ease; }
 @keyframes fade{ from{opacity:0;} to{opacity:1;} }
 
-/* Scroll-reveal: subtiel, de kleurblokken doen het werk */
-.reveal{ opacity:0; transform:translateY(10px); transition:opacity .45s ease, transform .45s ease; }
-.reveal.in{ opacity:1; transform:none; }
+/* ===========================================================================
+ * Scroll-animaties (overgenomen van de Wix-site)
+ *   rev-fold  kop klapt naar je toe open   rotateX(-90deg) -> 0, 1200 ms
+ *   rev-up    tekst schuift omhoog + fade  translateY(60px) -> 0, 1200 ms
+ *   rev-wipe  beeld komt van boven vrij    clip-path + scale, 960 ms
+ * ======================================================================== */
+/* Keyframes in plaats van transities: de begintoestand mag de geometrie niet
+ * platleggen, anders ziet de IntersectionObserver het element nooit. */
+.rev-fold, .rev-up, .rev-wipe{ opacity:0; backface-visibility:hidden; }
+.rev-fold{ transform-origin:50% 0; }
+
+.rev-fold.in{ animation:revFold 1200ms cubic-bezier(.215,.61,.355,1) both; }
+@keyframes revFold{
+  from{ opacity:0;
+    transform:perspective(800px) translateZ(-100px) rotateX(-90deg) translateZ(100px); }
+  12%{ opacity:1; }
+  to{ opacity:1;
+    transform:perspective(800px) translateZ(-100px) rotateX(0deg) translateZ(100px); }
+}
+
+.rev-up.in{ animation:revUp 1200ms cubic-bezier(.445,.05,.55,.95) both; }
+@keyframes revUp{
+  from{ opacity:0; transform:translateY(60px); }
+  to{ opacity:1; transform:none; }
+}
+
+.rev-wipe.in{ animation:revWipe 960ms cubic-bezier(.215,.61,.355,1) both; }
+@keyframes revWipe{
+  from{ opacity:1; clip-path:polygon(0 0, 100% 0, 100% 0, 0 0); transform:scale(1.04); }
+  to{ opacity:1; clip-path:polygon(0 0, 100% 0, 100% 100%, 0 100%); transform:none; }
+}
 
 /* ===========================================================================
  * Header — het oranje navigatieblok
@@ -154,11 +182,15 @@ button{ font:inherit; }
 .band-link{ font-size:.85rem; text-decoration:underline; white-space:nowrap; }
 .band-emoji{ font-size:.85rem; justify-self:end; }
 
-.band-panel{ display:block; margin:0 var(--gut) clamp(28px,4vw,56px); padding:clamp(18px,3vw,40px);
-  position:relative; }
+.band-panel{ display:block; margin:0 var(--gut) clamp(28px,4vw,56px); position:relative; }
 .band-panel:hover{ text-decoration:none; }
+/* vormgegeven plaat van de Wix-site: vult het paneel, naam zit in het beeld */
+.panel-graphic{ display:block; width:100%; height:auto; border:3px solid var(--ink); }
+/* terugval voor projecten zonder plaat */
+.panel-frame{ margin:clamp(18px,3vw,40px); }
 .panel-frame{ position:relative; display:block; background:var(--paper);
   aspect-ratio:16/10; overflow:hidden; border:3px solid var(--ink); }
+.band-meta{ padding:0 clamp(18px,3vw,40px) clamp(18px,3vw,40px); }
 .panel-img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
   transition:transform .5s ease; }
 .band-panel:hover .panel-img{ transform:scale(1.04); }
@@ -370,28 +402,14 @@ button{ font:inherit; }
 .detail-result-label{ display:block; font-size:.68rem; text-transform:uppercase;
   letter-spacing:.16em; margin-bottom:7px; }
 .detail-result p{ margin:0; font-size:1rem; }
-.detail-cover{ margin:clamp(22px,3vw,40px) 0; }
-.detail-cover-rot{ aspect-ratio:16/9; border:3px solid var(--ink); }
 .detail-sheet .tag-row{ margin-top:clamp(24px,3vw,40px); }
 
-.detail-gallery-wrap{ margin-top:clamp(26px,4vw,48px); }
-.detail-gallery-wrap > h2{ font-size:clamp(1.2rem,2.6vw,1.9rem);
-  border-bottom:3px solid var(--ink); padding-bottom:10px; margin:0 0 18px; }
-.bm-carousel{ position:relative; }
-.bm-viewport{ overflow:hidden; border:3px solid var(--ink); background:var(--paper); }
-.bm-track{ display:flex; transition:transform .45s ease; }
-.bm-slide{ flex:0 0 100%; padding:0; margin:0; border:0; background:none; cursor:zoom-in; }
-.bm-slide img{ display:block; width:100%; aspect-ratio:16/10; object-fit:contain;
-  background:var(--paper); }
-.bm-arrow{ position:absolute; top:50%; transform:translateY(-50%); width:46px; height:46px;
-  background:var(--paper); border:3px solid var(--ink); cursor:pointer; font-size:1.4rem;
-  line-height:1; }
-.bm-arrow:hover{ background:var(--magenta); color:var(--paper); }
-.bm-prev{ left:10px; } .bm-next{ right:10px; }
-.bm-dots{ display:flex; justify-content:center; gap:8px; margin-top:14px; }
-.bm-dot{ width:12px; height:12px; padding:0; background:var(--paper);
-  border:2px solid var(--ink); cursor:pointer; }
-.bm-dot.on{ background:var(--magenta); }
+/* De dia's van de case, onder elkaar over de volle breedte (zoals op Wix) */
+.case-stack{ display:grid; gap:clamp(18px,3vw,40px); margin:clamp(26px,4vw,52px) 0 0; }
+.case-shot{ display:block; width:100%; padding:0; margin:0; border:3px solid var(--ink);
+  background:var(--paper); cursor:zoom-in; overflow:hidden; font:inherit; }
+.case-shot img{ display:block; width:100%; height:auto; transition:transform .5s ease; }
+.case-shot:hover img{ transform:scale(1.015); }
 
 /* ===========================================================================
  * Footer
@@ -416,8 +434,9 @@ button{ font:inherit; }
  * ======================================================================== */
 @media print{
   .no-print,.site-header,.nav-toggle,.lightbox,
-  .bm-arrow,.bm-dots,.back-link{ display:none!important; }
+  .back-link{ display:none!important; }
   body{ background:#fff; color:#000; font-size:11pt; }
+  .case-shot{ break-inside:avoid; page-break-inside:avoid; border-width:1pt; }
   .work-band,.about-body,.letter-body,.detail-sheet,.card,.notice{
     background:#fff!important; border-color:#000!important;
     break-inside:avoid; page-break-inside:avoid; }
@@ -427,11 +446,11 @@ button{ font:inherit; }
   .site-footer{ background:#fff; color:#000; border-top:1pt solid #000; }
   .site-footer a{ color:#000; }
   .footer-links{ display:none; }
-  .reveal{ opacity:1!important; transform:none!important; }
+  .rev-fold,.rev-up,.rev-wipe{ opacity:1!important; transform:none!important; clip-path:none!important; }
   a[href^="http"]::after{ content:" (" attr(href) ")"; font-size:8pt; font-weight:400; }
 }
 
 @media (prefers-reduced-motion: reduce){
   *{ animation:none!important; transition:none!important; }
-  .reveal{ opacity:1; transform:none; }
+  .rev-fold,.rev-up,.rev-wipe{ opacity:1; transform:none; clip-path:none; }
 }
